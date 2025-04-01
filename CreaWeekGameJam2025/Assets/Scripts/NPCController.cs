@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
 
@@ -51,7 +52,40 @@ public interface IState
     void OnExit();
 }
 
+public class EnterBuildingState : IState
+{
+    NPCController context;
 
+    float speed = 2f;
+    float dst = 3;
+
+    float time = 0;
+
+    Vector3 startPos;
+
+    Vector3 dir1;
+    Vector3 dir2;
+
+    public EnterBuildingState(Vector3 startForward, NPCController ctx)
+    {
+        context = ctx;
+        startPos = context.transform.position;
+    }   
+    public void OnEnter()
+    {
+        
+    }
+
+    public void OnExit()
+    {
+        
+    }
+
+    public void OnUpdate()
+    {
+        
+    }
+}
 public class WanderingState : IState
 {
 
@@ -60,7 +94,14 @@ public class WanderingState : IState
     float speed = .5f;
     float dst = 3;
 
-    public WanderingState(Vector3 startForward,NPCController ctx)
+    float time = 0;
+
+    Vector3 startPos;
+
+    Vector3 dir1;
+    Vector3 dir2;
+
+    public WanderingState(Vector3 startForward, NPCController ctx)
     {
         context = ctx;
 
@@ -80,23 +121,16 @@ public class WanderingState : IState
                 dir1.y = 0;
                 dir1.Normalize();
                 dir1 *= dst;
-                
-            } while (Physics.Raycast(startPos +  Vector3.up, dir1, dst, 1 << 16));
+
+            } while (Physics.Raycast(startPos + Vector3.up, dir1, dst, 1 << 16));
 
         }
 
         do
         {
             dir2 = Quaternion.Euler(0, Random.Range(-145, 145), 0) * dir1;
-        } while (Physics.Raycast(startPos+dir1 + Vector3.up,dir2, dst * 2, 1 << 16));
+        } while (Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
     }
-
-    float time = 0;
-
-    Vector3 startPos;
-
-    Vector3 dir1;
-    Vector3 dir2;
 
     public void OnEnter()
     {
@@ -124,8 +158,23 @@ public class WanderingState : IState
         }
         else
         {
+            if (BuildingNearby())
+            {
+
+            }
             context.StateMachine.MoveToState(new WanderingState(dir2, context));
         }
         
+    }
+
+    private bool BuildingNearby()
+    {
+        Collider[] Buildings = Physics.OverlapSphere(startPos + dir1 + dir2, dst * 2, 1 << 16);
+        
+
+
+        return false;
+
+
     }
 }
