@@ -15,7 +15,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     private PlayerShooting _playerShooting = null;
 
-    [SerializeField]
     private PlayerCamera _camera = null;
 
     [SerializeField]
@@ -74,9 +73,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _controls.Shoot.SetCallbacks(_playerShooting);
         }
 
+
+        _camera = FindFirstObjectByType<PlayerCamera>();
         if(_camera != null)
         {
             _controls.RotateCamera.SetCallbacks(_camera);
+        
+            if(BodyParts.Count > 0)
+            {
+                _camera.Player = BodyParts[0];
+            }
         }
 
         _controls.Enable();
@@ -269,6 +275,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         _canMove = false;
         _moveDirection = Vector3.zero;
+
+        if(_rigidbody)
+        {
+            _rigidbody.linearVelocity = Vector3.zero;
+        }
+
         yield return new WaitForSeconds(duration);
         _canMove = true;
     }
