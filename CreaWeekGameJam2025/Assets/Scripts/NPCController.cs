@@ -1,14 +1,19 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem.LowLevel;
+using static BleedingState;
 
 public class NPCController : MonoBehaviour
 {
 
     [HideInInspector] public StateMachine StateMachine;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    [SerializeField] public UnityEvent OnDeath;
+
     void Start()
     {
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
@@ -18,6 +23,11 @@ public class NPCController : MonoBehaviour
     void Update()
     {
         StateMachine.Update();
+    }
+
+    public void Destroy()
+    {
+        Destroy(gameObject);
     }
 }
 
@@ -51,7 +61,29 @@ public interface IState
     void OnUpdate();
     void OnExit();
 }
+public class DeadNPCState : IState
+{
+    NPCController context;
+    public DeadNPCState(NPCController ctx)
+    {
+        context = ctx;
+    }
+    public void OnEnter()
+    {
+        context.OnDeath.Invoke();
+        context.transform.localScale = new Vector3(1, .1f, 1);
+    }
 
+    public void OnExit()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnUpdate()
+    {
+        throw new System.NotImplementedException();
+    }
+}
 public class EnterBuildingState : IState
 {
     NPCController context;
@@ -217,5 +249,164 @@ public class WanderingState : IState
         return false;
 
 
+    }
+}
+
+public class BleedingState : IState
+{
+    public delegate void SmallBloodDropped(Vector3 pos, float size);
+    public static event SmallBloodDropped onSmallBloodDropped;
+
+    float minDelay = 0.1f;
+    float maxDelay = 0.8f;
+    float bloodSize = 1.0f;
+    float bloodCooldown = 0;
+    float bloodTimer = 0;
+
+    int currentIteration = 0;
+    int maxIterations = 5;
+
+    NPCController context;
+
+    float speed = 2f;
+    float dst = 3;
+
+    float time = 0;
+
+    Vector3 startPos;
+
+    Vector3 dir1;
+    Vector3 dir2;
+
+    public BleedingState(Vector3 startForward, int iteration, NPCController ctx)
+    {
+        context = ctx;
+
+        currentIteration = iteration;
+
+        startPos = context.transform.position;
+
+        if (startForward != Vector3.zero)
+        {
+            dir1 = startForward.normalized * dst;
+        }
+        else
+        {
+            do
+            {
+                time = 0;
+
+                dir1 = Random.insideUnitSphere;
+                dir1.y = 0;
+                dir1.Normalize();
+                dir1 *= dst;
+
+            } while (Physics.Raycast(startPos + Vector3.up, dir1, dst, 1 << 16));
+
+        }
+
+        do
+        {
+            dir2 = Quaternion.Euler(0, Random.Range(-145, 145), 0) * dir1;
+        } while (Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
+    }
+
+    public void OnEnter()
+    {
+        DropBlood();
+    }
+
+    public void OnExit()
+    {
+    }
+
+    private void DropBlood()
+    {
+        onSmallBloodDropped.Invoke(context.transform.position, bloodSize);
+
+        bloodTimer = 0;
+        bloodCooldown = Random.Range(minDelay, maxDelay);
+    }
+
+    public void OnUpdate()
+    {
+        time += Time.deltaTime;
+        bloodTimer += Time.deltaTime;
+
+        if(bloodTimer > bloodCooldown)
+        {
+            DropBlood();
+        }
+
+        if (time <= speed)
+        {
+            float normalizedTime = time / speed;
+
+            Vector3 pos1 = startPos + Vector3.Lerp(Vector3.zero, dir1, normalizedTime);
+            Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime);
+
+            Vector3 targetPosition = Vector3.Lerp(pos1, pos2, normalizedTime);
+
+            context.transform.position = targetPosition;
+
+        }
+        else
+        {
+            if (currentIteration >= maxIterations)
+            {
+                context.StateMachine.MoveToState(new DyingState(context));
+            }
+            else
+            {
+                context.StateMachine.MoveToState(new BleedingState(dir2, currentIteration + 1, context));
+            }
+        }
+    }
+}
+
+public class DyingState : IState
+{
+    public delegate void BigBLoodDropped(Vector3 pos, float size);
+    public static event BigBLoodDropped onBigBloodDropped;
+
+    float minDelay = 1.0f;
+    float maxDelay = 2.8f;
+    float bloodSize = 2.0f;
+
+    NPCController context;
+
+    float dyingCooldown = 0;
+    float dyingTimer = 0;
+    
+
+    public DyingState(NPCController ctx)
+    {
+        context = ctx;
+    }
+
+    public void OnEnter()
+    {
+        dyingCooldown = Random.Range(minDelay, maxDelay);
+    }
+
+    public void OnExit()
+    {
+    }
+
+    private void DropBlood()
+    {
+        onBigBloodDropped.Invoke(context.transform.position, bloodSize);
+
+        context.Destroy();
+    }
+
+    public void OnUpdate()
+    {
+       dyingTimer += Time.deltaTime;
+        
+        if(dyingTimer > dyingCooldown)
+        {
+            DropBlood();
+        }
     }
 }

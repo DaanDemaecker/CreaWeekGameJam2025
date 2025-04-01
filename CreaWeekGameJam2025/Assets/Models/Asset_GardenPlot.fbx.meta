@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4ff914c5ad337294cba8b5040c21850f
+guid: 2ca7bb48795c740468318543a31ec4cb
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -7,18 +7,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: PM3D_Sphere3D1
-    second: {fileID: 2100000, guid: df2e02a3c79ce944389f5b594346032d, type: 2}
+      name: M_Sheet
+    second: {fileID: 2100000, guid: 2e08a599d117f5b4d8e5cafd92d54f0b, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: PM3D_Sphere3D2
-    second: {fileID: 2100000, guid: df2e02a3c79ce944389f5b594346032d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: standardSurface1
-    second: {fileID: 2100000, guid: df2e02a3c79ce944389f5b594346032d, type: 2}
+      name: lambert2
+    second: {fileID: 2100000, guid: 0581d03ef703de14c82911de49d70717, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -48,7 +43,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 25
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -103,7 +98,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 25
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0

@@ -1,5 +1,6 @@
 using System.Collections;
-using Unity.VisualScripting;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -10,6 +11,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private Rigidbody _rigidbody = null;
 
     private Vector3 _moveDirection = Vector3.zero;
+    private float _moveMagnitude = 0f;
+
+    private PlayerShooting _playerShooting = null;
 
     [SerializeField]
     private PlayerCamera _camera = null;
@@ -42,14 +46,14 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private AnimationCurve _jumpCurve;
 
     [SerializeField]
+    private List<Transform> BodyParts = new List<Transform>();
+
+
+    [SerializeField]
     private float _jumpCooldown = 0.25f;
 
     private bool _isJumping = false;
 
-    private float _jumpTimer = 0.0f;
-
-    private Vector3 _jumpStart = Vector3.zero;
-    private Vector3 _jumpEnd = Vector3.zero;
 
     int _bloodLayerMask = 0;
 
@@ -62,6 +66,13 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _controls = new PlayerInput();
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
+
+        _playerShooting = GetComponent<PlayerShooting>();
+
+        if (_playerShooting != null)
+        {
+            _controls.Shoot.SetCallbacks(_playerShooting);
+        }
 
         if(_camera != null)
         {
@@ -85,6 +96,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         }
 
         var input = context.ReadValue<Vector2>();
+
+        _moveMagnitude = input.magnitude;
+
         var direction = new Vector3(input.x, 0, input.y);
 
         if(_camera != null)
@@ -103,35 +117,11 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     void FixedUpdate()
     {
-        _moveSound.volume = _moveDirection.magnitude * _moveVolume;
-
-        if (_isJumping)
-        {
-            float lerpFactor = _jumpTimer / _jumpDuration;
-            float jumpHeight = _jumpCurve.Evaluate(lerpFactor) * _jumpHeight;
-
-            Vector3 newPos = Vector3.Lerp(_jumpStart, _jumpEnd, lerpFactor);
-
-            newPos.y = _jumpStart.y + jumpHeight;
-            
-            transform.position = newPos;
-
-
-            _jumpTimer += Time.fixedDeltaTime;
-
-            if (_jumpTimer >= _jumpDuration)
-            {
-                transform.position = _jumpEnd;
-                _isJumping = false;
-                _jumpTimer = 0;
-                StartCoroutine(JumpCooldown(_jumpCooldown));
-            }
-        }
-        else if (_rigidbody != null)
+        if (_rigidbody != null && !_isJumping)
         {
             _moveDirection.y = 0;
             _moveDirection.Normalize();
-            _moveDirection *= _moveSpeed;
+            _moveDirection *= _moveMagnitude * _moveSpeed;
 
             if(!IsMoveDirectionValid())
             {
@@ -149,15 +139,57 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         Ray ray = new Ray(transform.position + _moveDirection * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
-
         return result;
+    }
+    [SerializeField]
+    float _offsetStep = .55f;
+    IEnumerator Jump(Vector3 nextBloodpool)
+    {
+        _isJumping = true;
+        _canJump = false;
+
+        Vector3 _jumpStart = transform.position;
+        Vector3 _jumpEnd = nextBloodpool + (nextBloodpool - _jumpStart).normalized * .2f;
+
+        float startTime = Time.time;
+        while(startTime + _jumpDuration + .4f >= Time.time)
+        {
+            float lerpFactor = (Time.time - startTime) / _jumpDuration;
+
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                float offset = i * _offsetStep;
+                
+                Vector3 newPos = Vector3.Lerp(_jumpStart,_jumpEnd, lerpFactor - offset);
+                float jumpHeight = _jumpCurve.Evaluate(lerpFactor - offset) * _jumpHeight;
+                newPos.y = _jumpStart.y + jumpHeight;
+
+
+                Vector3 targetDir = new Vector3(0, _jumpCurve.Evaluate(lerpFactor - offset), lerpFactor - offset) -
+                    new Vector3(0, _jumpCurve.Evaluate(lerpFactor - .1f - offset), lerpFactor - .1f - offset);
+                Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
+                BodyParts[i].transform.localRotation = targetRotation;
+
+                BodyParts[i].transform.position = newPos;
+            }
+            yield return null;
+        }
+        for (int i = 0; i < BodyParts.Count; i++)
+        {
+            BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
+            BodyParts[i].transform.localPosition = Vector3.zero + 
+                (i * Vector3.down * _offsetStep);
+        }
+        Debug.Log("DONE");
+        transform.position = _jumpEnd;
+
+        _isJumping = false;
+        StartCoroutine(JumpCooldown(_jumpCooldown));
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        _jumpSound.Play();
-        
-        if(!_canJump)
+        if(!_canJump || !context.started)
         {
             return;
         }
@@ -167,13 +199,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         if (nextBloodPool != Vector3.zero)
         {
-            transform.position = nextBloodPool;
-            _bloodSplash.Play();
             StartCoroutine(DisableMovement(_jumpDuration));
-            _isJumping = true;
-            _jumpStart = transform.position;
-            _jumpEnd = nextBloodPool;
-            _canJump = false;
+            StartCoroutine(Jump(nextBloodPool));
+            
         }
     }
 
@@ -231,5 +259,34 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         yield return new WaitForSeconds(duration);
         _canJump = true;
+    }
+
+    private void StartJump(Vector3 nextBloodPool)
+    {
+        _jumpSound.Play();
+
+        StartCoroutine(DisableMovement(_jumpDuration));
+        _isJumping = true;
+        _jumpStart = transform.position;
+        _jumpEnd = nextBloodPool;
+        _canJump = false;
+
+        if(_playerShooting)
+        {
+            _playerShooting.CanShoot = false;
+        }
+    }
+
+    private void StopJump()
+    {
+        transform.position = _jumpEnd;
+        _isJumping = false;
+        _jumpTimer = 0;
+        StartCoroutine(JumpCooldown(_jumpCooldown));
+
+        if (_playerShooting)
+        {
+            _playerShooting.CanShoot = true;
+        }
     }
 }
