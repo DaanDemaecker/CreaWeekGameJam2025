@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInput.IJumpActions
 {
@@ -17,6 +18,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     [SerializeField]
     private float _epsilon = 0.1f;
 
+
+    [SerializeField]
+    private AudioSource _jumpSound;
+    [SerializeField]
+    private AudioSource _moveSound;
+    private float _moveVolume = 0.1f;
+
+    [SerializeField]
+    private VisualEffect _bloodSplash;
+
     int _bloodLayerMask = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -30,6 +41,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _rigidbody = GetComponent<Rigidbody>();
 
         _bloodLayerMask = LayerMask.GetMask("Blood");
+
+        _bloodSplash.Stop();
     }
 
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -42,10 +55,13 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         {
             transform.forward = new Vector3(direction.x, 0, direction.y);
         }
+
     }
 
     void FixedUpdate()
     {
+        _moveSound.volume = _moveDirection.magnitude * _moveVolume;
+
         if (_rigidbody != null)
         {
             _moveDirection.y = 0;
@@ -74,11 +90,14 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
+        _jumpSound.Play();
+        
         var nextBloodPool = FindBloodPoolLocation();
 
         if (nextBloodPool != Vector3.zero)
         {
             transform.position = nextBloodPool;
+            _bloodSplash.Play();
         }
     }
 
