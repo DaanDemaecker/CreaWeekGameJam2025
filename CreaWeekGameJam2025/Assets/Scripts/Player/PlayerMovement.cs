@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInput.IJumpActions
 {
@@ -9,6 +10,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private Rigidbody _rigidbody = null;
 
     private Vector3 _moveDirection = Vector3.zero;
+    private float _moveMagnitude = 0f;
+
+    private PlayerShooting _playerShooting = null;
 
     [SerializeField]
     private PlayerCamera _camera = null;
@@ -21,6 +25,15 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     [SerializeField]
     private float _epsilon = 0.1f;
+
+    [SerializeField]
+    private AudioSource _jumpSound;
+    [SerializeField]
+    private AudioSource _moveSound;
+    private float _moveVolume = 0.1f;
+
+    [SerializeField]
+    private VisualEffect _bloodSplash;
 
     [SerializeField]
     private float _jumpDuration = 0.5f;
@@ -53,6 +66,13 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
 
+        _playerShooting = GetComponent<PlayerShooting>();
+
+        if (_playerShooting != null)
+        {
+            _controls.Shoot.SetCallbacks(_playerShooting);
+        }
+
         if(_camera != null)
         {
             _controls.RotateCamera.SetCallbacks(_camera);
@@ -63,6 +83,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _rigidbody = GetComponent<Rigidbody>();
 
         _bloodLayerMask = LayerMask.GetMask("Blood");
+
+        _bloodSplash.Stop();
     }
 
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -73,6 +95,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         }
 
         var input = context.ReadValue<Vector2>();
+
+        _moveMagnitude = input.magnitude;
+
         var direction = new Vector3(input.x, 0, input.y);
 
         if(_camera != null)
@@ -86,10 +111,13 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         {
             transform.forward = direction;
         }
+
     }
 
     void FixedUpdate()
     {
+        _moveSound.volume = _moveDirection.magnitude * _moveVolume;
+
         if (_isJumping)
         {
             float lerpFactor = _jumpTimer / _jumpDuration;
@@ -106,17 +134,14 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
             if (_jumpTimer >= _jumpDuration)
             {
-                transform.position = _jumpEnd;
-                _isJumping = false;
-                _jumpTimer = 0;
-                StartCoroutine(JumpCooldown(_jumpCooldown));
+                StopJump();
             }
         }
         else if (_rigidbody != null)
         {
             _moveDirection.y = 0;
             _moveDirection.Normalize();
-            _moveDirection *= _moveSpeed;
+            _moveDirection *= _moveMagnitude * _moveSpeed;
 
             if(!IsMoveDirectionValid())
             {
@@ -140,7 +165,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if(!_canJump)
+        if(!_canJump || !context.started)
         {
             return;
         }
@@ -150,11 +175,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         if (nextBloodPool != Vector3.zero)
         {
-            StartCoroutine(DisableMovement(_jumpDuration));
-            _isJumping = true;
-            _jumpStart = transform.position;
-            _jumpEnd = nextBloodPool;
-            _canJump = false;
+            StartJump(nextBloodPool);
         }
     }
 
@@ -212,5 +233,34 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         yield return new WaitForSeconds(duration);
         _canJump = true;
+    }
+
+    private void StartJump(Vector3 nextBloodPool)
+    {
+        _jumpSound.Play();
+
+        StartCoroutine(DisableMovement(_jumpDuration));
+        _isJumping = true;
+        _jumpStart = transform.position;
+        _jumpEnd = nextBloodPool;
+        _canJump = false;
+
+        if(_playerShooting)
+        {
+            _playerShooting.CanShoot = false;
+        }
+    }
+
+    private void StopJump()
+    {
+        transform.position = _jumpEnd;
+        _isJumping = false;
+        _jumpTimer = 0;
+        StartCoroutine(JumpCooldown(_jumpCooldown));
+
+        if (_playerShooting)
+        {
+            _playerShooting.CanShoot = true;
+        }
     }
 }
