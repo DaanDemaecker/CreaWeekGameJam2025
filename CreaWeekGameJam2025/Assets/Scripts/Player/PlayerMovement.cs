@@ -11,6 +11,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     private Vector3 _moveDirection = Vector3.zero;
 
+    private PlayerShooting _playerShooting = null;
+
     [SerializeField]
     private PlayerCamera _camera = null;
 
@@ -62,6 +64,13 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _controls = new PlayerInput();
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
+
+        _playerShooting = GetComponent<PlayerShooting>();
+
+        if (_playerShooting != null)
+        {
+            _controls.Shoot.SetCallbacks(_playerShooting);
+        }
 
         if(_camera != null)
         {
@@ -121,10 +130,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
             if (_jumpTimer >= _jumpDuration)
             {
-                transform.position = _jumpEnd;
-                _isJumping = false;
-                _jumpTimer = 0;
-                StartCoroutine(JumpCooldown(_jumpCooldown));
+                StopJump();
             }
         }
         else if (_rigidbody != null)
@@ -155,9 +161,17 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
         _jumpSound.Play();
         
         if(!_canJump)
+=======
+        if(!_canJump || !context.started)
+>>>>>>> Stashed changes
+=======
+        if(!_canJump || !context.started)
+>>>>>>> Stashed changes
         {
             return;
         }
@@ -167,6 +181,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         if (nextBloodPool != Vector3.zero)
         {
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
             transform.position = nextBloodPool;
             _bloodSplash.Play();
             StartCoroutine(DisableMovement(_jumpDuration));
@@ -174,6 +190,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _jumpStart = transform.position;
             _jumpEnd = nextBloodPool;
             _canJump = false;
+=======
+            StartJump(nextBloodPool);
+>>>>>>> Stashed changes
+=======
+            StartJump(nextBloodPool);
+>>>>>>> Stashed changes
         }
     }
 
@@ -231,5 +253,32 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         yield return new WaitForSeconds(duration);
         _canJump = true;
+    }
+
+    private void StartJump(Vector3 nextBloodPool)
+    {
+        StartCoroutine(DisableMovement(_jumpDuration));
+        _isJumping = true;
+        _jumpStart = transform.position;
+        _jumpEnd = nextBloodPool;
+        _canJump = false;
+
+        if(_playerShooting)
+        {
+            _playerShooting.CanShoot = false;
+        }
+    }
+
+    private void StopJump()
+    {
+        transform.position = _jumpEnd;
+        _isJumping = false;
+        _jumpTimer = 0;
+        StartCoroutine(JumpCooldown(_jumpCooldown));
+
+        if (_playerShooting)
+        {
+            _playerShooting.CanShoot = true;
+        }
     }
 }
