@@ -20,17 +20,6 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
         get { return _canShoot; }
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void OnShootBig(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         if (_canShoot && context.started)
