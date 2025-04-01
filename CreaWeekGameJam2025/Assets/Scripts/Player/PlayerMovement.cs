@@ -145,12 +145,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     float _offsetStep = .55f;
     IEnumerator Jump(Vector3 nextBloodpool)
     {
+
+        // start jumping
         _isJumping = true;
         _canJump = false;
 
         Vector3 _jumpStart = transform.position;
         Vector3 _jumpEnd = nextBloodpool + (nextBloodpool - _jumpStart).normalized * .2f;
 
+
+        // actual jumping
         float startTime = Time.time;
         while(startTime + _jumpDuration + .4f >= Time.time)
         {
@@ -181,6 +185,10 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 (i * Vector3.down * _offsetStep);
         }
         Debug.Log("DONE");
+
+
+        //Stop jumping code
+
         transform.position = _jumpEnd;
 
         _isJumping = false;
@@ -261,32 +269,5 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _canJump = true;
     }
 
-    private void StartJump(Vector3 nextBloodPool)
-    {
-        _jumpSound.Play();
-
-        StartCoroutine(DisableMovement(_jumpDuration));
-        _isJumping = true;
-        _jumpStart = transform.position;
-        _jumpEnd = nextBloodPool;
-        _canJump = false;
-
-        if(_playerShooting)
-        {
-            _playerShooting.CanShoot = false;
-        }
-    }
-
-    private void StopJump()
-    {
-        transform.position = _jumpEnd;
-        _isJumping = false;
-        _jumpTimer = 0;
-        StartCoroutine(JumpCooldown(_jumpCooldown));
-
-        if (_playerShooting)
-        {
-            _playerShooting.CanShoot = true;
-        }
-    }
+    
 }
