@@ -46,3 +46,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _splatterPrefabs:
   - {fileID: 8964362009345657410, guid: 778fdae42fa26fe4ebffb854dd90ac89, type: 3}
+  - {fileID: 8964362009345657410, guid: fa8c47b1cc0614f41a9ad20bad159ac3, type: 3}
+  - {fileID: 8964362009345657410, guid: 3cf41e3bb8298a74b9f435964af331f0, type: 3}

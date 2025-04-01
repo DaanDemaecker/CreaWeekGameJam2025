@@ -6,6 +6,12 @@ public class BloodSplatterManager : MonoBehaviour
     [SerializeField]
     private List<GameObject> _splatterPrefabs = new List<GameObject>();
 
+    int layerMask;
+
+    private void Start()
+    {
+       layerMask = LayerMask.GetMask("Ground");
+    }
 
     private void Update()
     {
@@ -13,7 +19,7 @@ public class BloodSplatterManager : MonoBehaviour
         {
             RaycastHit result;
 
-            if(Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out result))
+            if(Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out result, 100, layerMask))
             {
                 SpawnBloodSplatter(result.point);
             }
