@@ -162,7 +162,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             ""actions"": [
                 {
                     ""name"": ""New action"",
-                    ""type"": ""Value"",
+                    ""type"": ""PassThrough"",
                     ""id"": ""5c26cfac-f83d-4baa-9cc6-c5b18303ce12"",
                     ""expectedControlType"": ""Axis"",
                     ""processors"": """",

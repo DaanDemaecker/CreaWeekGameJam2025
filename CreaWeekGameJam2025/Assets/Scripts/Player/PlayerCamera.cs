@@ -7,6 +7,12 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
     private Vector3 _cameraOffset = Vector3.zero;
 
     private float _yPos = 0f;
+    private float _playerYPos = 0f;
+
+    [SerializeField]
+    private float _rotationSpeed = 20;
+
+    private float _updateAngle = 0f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -18,6 +24,7 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
         if (_player != null)
         {
             _cameraOffset = transform.position - _player.transform.position;
+            _playerYPos = _player.transform.position.y;
         }
     }
 
@@ -26,13 +33,19 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
     {
         if (_player != null)
         {
+            _cameraOffset = Quaternion.AngleAxis(_updateAngle, Vector3.up) * _cameraOffset;
+
             transform.position = _player.transform.position + _cameraOffset;
             transform.position = new Vector3(transform.position.x, _yPos, transform.position.z);
+
+            transform.LookAt(new Vector3(_player.transform.position.x, _playerYPos, _player.transform.position.z));
         }
     }
 
     public void OnNewaction(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        float movement = context.ReadValue<float>();        
+        float movement = context.ReadValue<float>();
+
+        _updateAngle = movement * _rotationSpeed;
     }
 }
