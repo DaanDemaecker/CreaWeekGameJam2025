@@ -155,6 +155,67 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""RotateCamera"",
+            ""id"": ""97f49ad5-4322-41fd-9173-266508e03874"",
+            ""actions"": [
+                {
+                    ""name"": ""New action"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""5c26cfac-f83d-4baa-9cc6-c5b18303ce12"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""226530a3-4464-49e2-b2f3-346b8c74fff6"",
+                    ""path"": ""<Gamepad>/rightStick/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""63c1e79d-79c1-4cc7-91f5-1d954378db2f"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""39fead83-4b54-4042-bc5c-2da61f6334cc"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""87f59168-1f8f-48f9-9090-581625d2d5a6"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -165,12 +226,16 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         // Jump
         m_Jump = asset.FindActionMap("Jump", throwIfNotFound: true);
         m_Jump_Jump = m_Jump.FindAction("Jump", throwIfNotFound: true);
+        // RotateCamera
+        m_RotateCamera = asset.FindActionMap("RotateCamera", throwIfNotFound: true);
+        m_RotateCamera_Newaction = m_RotateCamera.FindAction("New action", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
     {
         UnityEngine.Debug.Assert(!m_Move.enabled, "This will cause a leak and performance issues, PlayerInput.Move.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Jump.enabled, "This will cause a leak and performance issues, PlayerInput.Jump.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_RotateCamera.enabled, "This will cause a leak and performance issues, PlayerInput.RotateCamera.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -320,6 +385,52 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         }
     }
     public JumpActions @Jump => new JumpActions(this);
+
+    // RotateCamera
+    private readonly InputActionMap m_RotateCamera;
+    private List<IRotateCameraActions> m_RotateCameraActionsCallbackInterfaces = new List<IRotateCameraActions>();
+    private readonly InputAction m_RotateCamera_Newaction;
+    public struct RotateCameraActions
+    {
+        private @PlayerInput m_Wrapper;
+        public RotateCameraActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Newaction => m_Wrapper.m_RotateCamera_Newaction;
+        public InputActionMap Get() { return m_Wrapper.m_RotateCamera; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(RotateCameraActions set) { return set.Get(); }
+        public void AddCallbacks(IRotateCameraActions instance)
+        {
+            if (instance == null || m_Wrapper.m_RotateCameraActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_RotateCameraActionsCallbackInterfaces.Add(instance);
+            @Newaction.started += instance.OnNewaction;
+            @Newaction.performed += instance.OnNewaction;
+            @Newaction.canceled += instance.OnNewaction;
+        }
+
+        private void UnregisterCallbacks(IRotateCameraActions instance)
+        {
+            @Newaction.started -= instance.OnNewaction;
+            @Newaction.performed -= instance.OnNewaction;
+            @Newaction.canceled -= instance.OnNewaction;
+        }
+
+        public void RemoveCallbacks(IRotateCameraActions instance)
+        {
+            if (m_Wrapper.m_RotateCameraActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IRotateCameraActions instance)
+        {
+            foreach (var item in m_Wrapper.m_RotateCameraActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_RotateCameraActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public RotateCameraActions @RotateCamera => new RotateCameraActions(this);
     public interface IMoveActions
     {
         void OnMove(InputAction.CallbackContext context);
@@ -327,5 +438,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     public interface IJumpActions
     {
         void OnJump(InputAction.CallbackContext context);
+    }
+    public interface IRotateCameraActions
+    {
+        void OnNewaction(InputAction.CallbackContext context);
     }
 }

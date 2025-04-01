@@ -1,3 +1,5 @@
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -10,6 +12,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private Vector3 _moveDirection = Vector3.zero;
 
     [SerializeField]
+    private PlayerCamera _camera = null;
+
+    [SerializeField]
     private float _moveSpeed = 10.0f;
 
     [SerializeField]
@@ -17,7 +22,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     [SerializeField]
     private float _epsilon = 0.1f;
-
 
     [SerializeField]
     private AudioSource _jumpSound;
@@ -28,7 +32,29 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     [SerializeField]
     private VisualEffect _bloodSplash;
 
+    [SerializeField]
+    private float _jumpDuration = 0.5f;
+
+    [SerializeField]
+    private float _jumpHeight = 0.5f;
+
+    [SerializeField]
+    private AnimationCurve _jumpCurve;
+
+    [SerializeField]
+    private float _jumpCooldown = 0.25f;
+
+    private bool _isJumping = false;
+
+    private float _jumpTimer = 0.0f;
+
+    private Vector3 _jumpStart = Vector3.zero;
+    private Vector3 _jumpEnd = Vector3.zero;
+
     int _bloodLayerMask = 0;
+
+    bool _canMove = true;
+    bool _canJump = true;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -36,6 +62,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _controls = new PlayerInput();
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
+
+        if(_camera != null)
+        {
+            _controls.RotateCamera.SetCallbacks(_camera);
+        }
+
         _controls.Enable();
 
         _rigidbody = GetComponent<Rigidbody>();
@@ -47,13 +79,24 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        var direction = context.ReadValue<Vector2>();
-
-        _moveDirection = new Vector3(direction.x, 0, direction.y);
-
-        if (direction != Vector2.zero)
+        if(!_canMove)
         {
-            transform.forward = new Vector3(direction.x, 0, direction.y);
+            return;
+        }
+
+        var input = context.ReadValue<Vector2>();
+        var direction = new Vector3(input.x, 0, input.y);
+
+        if(_camera != null)
+        {
+            direction = _camera.RotateToCamera(direction);
+        }
+
+        _moveDirection = direction;
+
+        if (direction != Vector3.zero)
+        {
+            transform.forward = direction;
         }
 
     }
@@ -62,7 +105,29 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         _moveSound.volume = _moveDirection.magnitude * _moveVolume;
 
-        if (_rigidbody != null)
+        if (_isJumping)
+        {
+            float lerpFactor = _jumpTimer / _jumpDuration;
+            float jumpHeight = _jumpCurve.Evaluate(lerpFactor) * _jumpHeight;
+
+            Vector3 newPos = Vector3.Lerp(_jumpStart, _jumpEnd, lerpFactor);
+
+            newPos.y = _jumpStart.y + jumpHeight;
+            
+            transform.position = newPos;
+
+
+            _jumpTimer += Time.fixedDeltaTime;
+
+            if (_jumpTimer >= _jumpDuration)
+            {
+                transform.position = _jumpEnd;
+                _isJumping = false;
+                _jumpTimer = 0;
+                StartCoroutine(JumpCooldown(_jumpCooldown));
+            }
+        }
+        else if (_rigidbody != null)
         {
             _moveDirection.y = 0;
             _moveDirection.Normalize();
@@ -92,17 +157,31 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         _jumpSound.Play();
         
+        if(!_canJump)
+        {
+            return;
+        }
+
+        // Check for nearby bloodpool, if one is found, start jump
         var nextBloodPool = FindBloodPoolLocation();
 
         if (nextBloodPool != Vector3.zero)
         {
             transform.position = nextBloodPool;
             _bloodSplash.Play();
+            StartCoroutine(DisableMovement(_jumpDuration));
+            _isJumping = true;
+            _jumpStart = transform.position;
+            _jumpEnd = nextBloodPool;
+            _canJump = false;
         }
     }
 
     private Vector3 FindBloodPoolLocation()
     {
+        // This function will check if a bloodpool is in the direction the player is looking
+        // Before registering a bloodpool, we need to find a floor piece first
+
         int bloodDistance = 0;
 
         bool floorFound = false;
@@ -111,12 +190,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         {
             Ray ray = new Ray(transform.position + transform.forward * i * _epsilon*2 + Vector3.up * 2, Vector3.down);
 
-            bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
+            bool result = Physics.SphereCast(ray, _epsilon/2, 50, _bloodLayerMask);
 
             if(!floorFound && !result)
             {
                 floorFound = true;
-                Debug.Log("floor found");
+                continue;
             }
 
             if(floorFound && result)
@@ -126,6 +205,11 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             }
         }
 
+        if(!floorFound)
+        {
+            bloodDistance = (int)(_jumpDistance / _epsilon);
+        }
+
         if (bloodDistance > 0)
         {
             return transform.position + transform.forward * bloodDistance * _epsilon * 2;
@@ -133,5 +217,19 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
 
         return Vector3.zero;
+    }
+
+    public IEnumerator DisableMovement(float duration)
+    {
+        _canMove = false;
+        _moveDirection = Vector3.zero;
+        yield return new WaitForSeconds(duration);
+        _canMove = true;
+    }
+
+    public IEnumerator JumpCooldown(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        _canJump = true;
     }
 }
