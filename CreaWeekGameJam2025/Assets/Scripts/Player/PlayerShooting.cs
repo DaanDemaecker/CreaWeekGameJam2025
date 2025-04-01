@@ -12,17 +12,17 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
     [SerializeField]
     private float _shootCooldown = 0.5f;
 
-    bool _canShoot = true;
+    int _shootInhibitor = 0;
 
-    public bool CanShoot
+    public int ShootInhibitor
     {
-        set { _canShoot = value; }
-        get { return _canShoot; }
+        set { _shootInhibitor = value; }
+        get { return _shootInhibitor; }
     }
 
     public void OnShootBig(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if (_canShoot && context.started)
+        if (_shootInhibitor == 0 && context.started)
         {
             Shoot(_bigProjectile);
         }
@@ -30,7 +30,7 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 
     public void OnShootSmall(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if (_canShoot && context.started)
+        if (_shootInhibitor == 0 && context.started)
         {
             Shoot(_smallProjectile);
         }
@@ -51,10 +51,10 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 
     private IEnumerator DisableShootRoutine(float duration)
     {
-        _canShoot = false;
+        _shootInhibitor++;
 
         yield return new WaitForSeconds(duration);
 
-        _canShoot = true;
+        _shootInhibitor--;
     }
 }

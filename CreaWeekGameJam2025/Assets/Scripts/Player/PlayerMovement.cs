@@ -150,6 +150,11 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _isJumping = true;
         _canJump = false;
 
+        if(_playerShooting)
+        {
+            _playerShooting.ShootInhibitor += 1;
+        }
+
         Vector3 _jumpStart = transform.position;
         Vector3 _jumpEnd = nextBloodpool + (nextBloodpool - _jumpStart).normalized * .2f;
 
@@ -188,6 +193,11 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
 
         //Stop jumping code
+
+        if (_playerShooting)
+        {
+            _playerShooting.ShootInhibitor -= 1;
+        }
 
         transform.position = _jumpEnd;
 
