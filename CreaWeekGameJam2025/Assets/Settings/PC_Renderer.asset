@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4583d2da3d8b12468d545832a44b014, type: 3}
   m_Name: ScreenSpaceOutlines
   m_EditorClassIdentifier: 
-  m_Active: 0
-  renderPassEvent: 350
+  m_Active: 1
+  renderPassEvent: 300
   outlinesLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
   outlineSettings:
     outlineColor: {r: 0.16037738, g: 0.16037738, b: 0.16037738, a: 1}
-    outlineScale: 0.0011
-    depthThreshold: 2.5
-    robertsCrossMultiplier: 500
-    normalThreshold: 0.123
+    outlineScale: 0.002
+    depthThreshold: 3
+    robertsCrossMultiplier: 345
+    normalThreshold: 0.013
     steepAngleThreshold: 0.307
     steepAngleMultiplier: 46
     colorFormat: 0
@@ -59,7 +59,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 7833122117494664109}
   - {fileID: -8106061627050045786}
-  m_RendererFeatureMap: ad6b866f10d7b46ca6ce41e0e57b818f
+  - {fileID: 3674631151776654666}
+  m_RendererFeatureMap: ad6b866f10d7b46ca6ce41e0e57b818f4a653b4290e9fe32
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -85,6 +86,48 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
+--- !u!114 &3674631151776654666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: RenderWithoutOutlines
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: RenderWithoutOutlines
+    Event: 350
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 8
+      PassNames: []
+    overrideMaterial: {fileID: 0}
+    overrideMaterialPassIndex: 0
+    overrideShader: {fileID: 0}
+    overrideShaderPassIndex: 0
+    overrideMode: 1
+    overrideDepthState: 0
+    depthCompareFunction: 4
+    enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &7833122117494664109
 MonoBehaviour:
   m_ObjectHideFlags: 0
