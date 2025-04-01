@@ -11,6 +11,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private Vector3 _moveDirection = Vector3.zero;
 
     [SerializeField]
+    private PlayerCamera _camera = null;
+
+    [SerializeField]
     private float _moveSpeed = 10.0f;
 
     [SerializeField]
@@ -49,6 +52,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _controls = new PlayerInput();
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
+
+        if(_camera != null)
+        {
+            _controls.RotateCamera.SetCallbacks(_camera);
+        }
+
         _controls.Enable();
 
         _rigidbody = GetComponent<Rigidbody>();
