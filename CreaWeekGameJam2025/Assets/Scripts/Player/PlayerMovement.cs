@@ -11,6 +11,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     [SerializeField]
     private float _moveSpeed = 10.0f;
 
+    [SerializeField]
+    private float _jumpDistance = 5;
+
+    [SerializeField]
+    private float _epsilon = 0.1f;
+
     int _bloodLayerMask = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -61,13 +67,52 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         Ray ray = new Ray(transform.position + _moveDirection * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
-        bool result = Physics.SphereCast(ray, 0.1f, 50, _bloodLayerMask);
+        bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
 
         return result;
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        
+        var nextBloodPool = FindBloodPoolLocation();
+
+        if (nextBloodPool != Vector3.zero)
+        {
+            transform.position = nextBloodPool;
+        }
+    }
+
+    private Vector3 FindBloodPoolLocation()
+    {
+        int bloodDistance = 0;
+
+        bool floorFound = false;
+
+        for (int i = 0; i < (int)(_jumpDistance / _epsilon); i+=2)
+        {
+            Ray ray = new Ray(transform.position + transform.forward * i * _epsilon*2 + Vector3.up * 2, Vector3.down);
+
+            bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
+
+            if(!floorFound && !result)
+            {
+                floorFound = true;
+                Debug.Log("floor found");
+            }
+
+            if(floorFound && result)
+            {
+                bloodDistance = i;
+                break;
+            }
+        }
+
+        if (bloodDistance > 0)
+        {
+            return transform.position + transform.forward * bloodDistance * _epsilon * 2;
+        }
+
+
+        return Vector3.zero;
     }
 }
