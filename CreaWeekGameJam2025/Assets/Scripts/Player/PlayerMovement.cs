@@ -1,5 +1,6 @@
 using System.Collections;
-using Unity.VisualScripting;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInput.IJumpActions
@@ -32,14 +33,14 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private AnimationCurve _jumpCurve;
 
     [SerializeField]
+    private List<Transform> BodyParts = new List<Transform>();
+
+
+    [SerializeField]
     private float _jumpCooldown = 0.25f;
 
     private bool _isJumping = false;
 
-    private float _jumpTimer = 0.0f;
-
-    private Vector3 _jumpStart = Vector3.zero;
-    private Vector3 _jumpEnd = Vector3.zero;
 
     int _bloodLayerMask = 0;
 
@@ -90,29 +91,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     void FixedUpdate()
     {
-        if (_isJumping)
-        {
-            float lerpFactor = _jumpTimer / _jumpDuration;
-            float jumpHeight = _jumpCurve.Evaluate(lerpFactor) * _jumpHeight;
-
-            Vector3 newPos = Vector3.Lerp(_jumpStart, _jumpEnd, lerpFactor);
-
-            newPos.y = _jumpStart.y + jumpHeight;
-            
-            transform.position = newPos;
-
-
-            _jumpTimer += Time.fixedDeltaTime;
-
-            if (_jumpTimer >= _jumpDuration)
-            {
-                transform.position = _jumpEnd;
-                _isJumping = false;
-                _jumpTimer = 0;
-                StartCoroutine(JumpCooldown(_jumpCooldown));
-            }
-        }
-        else if (_rigidbody != null)
+        if (_rigidbody != null && !_isJumping)
         {
             _moveDirection.y = 0;
             _moveDirection.Normalize();
@@ -134,8 +113,52 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         Ray ray = new Ray(transform.position + _moveDirection * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
-
         return result;
+    }
+    [SerializeField]
+    float _offsetStep = .55f;
+    IEnumerator Jump(Vector3 nextBloodpool)
+    {
+        _isJumping = true;
+        _canJump = false;
+
+        Vector3 _jumpStart = transform.position;
+        Vector3 _jumpEnd = nextBloodpool + (nextBloodpool - _jumpStart).normalized * .2f;
+
+        float startTime = Time.time;
+        while(startTime + _jumpDuration + .4f >= Time.time)
+        {
+            float lerpFactor = (Time.time - startTime) / _jumpDuration;
+
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                float offset = i * _offsetStep;
+                
+                Vector3 newPos = Vector3.Lerp(_jumpStart,_jumpEnd, lerpFactor - offset);
+                float jumpHeight = _jumpCurve.Evaluate(lerpFactor - offset) * _jumpHeight;
+                newPos.y = _jumpStart.y + jumpHeight;
+
+
+                Vector3 targetDir = new Vector3(0, _jumpCurve.Evaluate(lerpFactor - offset), lerpFactor - offset) -
+                    new Vector3(0, _jumpCurve.Evaluate(lerpFactor - .1f - offset), lerpFactor - .1f - offset);
+                Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
+                BodyParts[i].transform.localRotation = targetRotation;
+
+                BodyParts[i].transform.position = newPos;
+            }
+            yield return null;
+        }
+        for (int i = 0; i < BodyParts.Count; i++)
+        {
+            BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
+            BodyParts[i].transform.localPosition = Vector3.zero + 
+                (i * Vector3.down * _offsetStep);
+        }
+        Debug.Log("DONE");
+        transform.position = _jumpEnd;
+
+        _isJumping = false;
+        StartCoroutine(JumpCooldown(_jumpCooldown));
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -151,10 +174,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         if (nextBloodPool != Vector3.zero)
         {
             StartCoroutine(DisableMovement(_jumpDuration));
-            _isJumping = true;
-            _jumpStart = transform.position;
-            _jumpEnd = nextBloodPool;
-            _canJump = false;
+            StartCoroutine(Jump(nextBloodPool));
+            
         }
     }
 

@@ -2,13 +2,16 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem.LowLevel;
 
 public class NPCController : MonoBehaviour
 {
 
     [HideInInspector] public StateMachine StateMachine;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    [SerializeField] public UnityEvent OnDeath;
+
     void Start()
     {
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
@@ -18,6 +21,11 @@ public class NPCController : MonoBehaviour
     void Update()
     {
         StateMachine.Update();
+    }
+
+    public void Die()
+    {
+
     }
 }
 
@@ -51,7 +59,29 @@ public interface IState
     void OnUpdate();
     void OnExit();
 }
+public class DeadNPCState : IState
+{
+    NPCController context;
+    public DeadNPCState(NPCController ctx)
+    {
+        context = ctx;
+    }
+    public void OnEnter()
+    {
+        context.OnDeath.Invoke();
+        context.transform.localScale = new Vector3(1, .1f, 1);
+    }
 
+    public void OnExit()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnUpdate()
+    {
+        throw new System.NotImplementedException();
+    }
+}
 public class EnterBuildingState : IState
 {
     NPCController context;
