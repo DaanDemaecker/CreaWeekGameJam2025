@@ -15,7 +15,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     private PlayerShooting _playerShooting = null;
 
-    [SerializeField]
     private PlayerCamera _camera = null;
 
     [SerializeField]
@@ -74,9 +73,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _controls.Shoot.SetCallbacks(_playerShooting);
         }
 
+
+        _camera = FindFirstObjectByType<PlayerCamera>();
         if(_camera != null)
         {
             _controls.RotateCamera.SetCallbacks(_camera);
+        
+            if(BodyParts.Count > 0)
+            {
+                _camera.Player = BodyParts[0];
+            }
         }
 
         _controls.Enable();
@@ -145,12 +151,21 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     float _offsetStep = .55f;
     IEnumerator Jump(Vector3 nextBloodpool)
     {
+
+        // start jumping
         _isJumping = true;
         _canJump = false;
+
+        if(_playerShooting)
+        {
+            _playerShooting.ShootInhibitor += 1;
+        }
 
         Vector3 _jumpStart = transform.position;
         Vector3 _jumpEnd = nextBloodpool + (nextBloodpool - _jumpStart).normalized * .2f;
 
+
+        // actual jumping
         float startTime = Time.time;
         while(startTime + _jumpDuration + .4f >= Time.time)
         {
@@ -181,6 +196,15 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 (i * Vector3.down * _offsetStep);
         }
         Debug.Log("DONE");
+
+
+        //Stop jumping code
+
+        if (_playerShooting)
+        {
+            _playerShooting.ShootInhibitor -= 1;
+        }
+
         transform.position = _jumpEnd;
 
         _isJumping = false;
@@ -251,6 +275,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         _canMove = false;
         _moveDirection = Vector3.zero;
+
+        if(_rigidbody)
+        {
+            _rigidbody.linearVelocity = Vector3.zero;
+        }
+
         yield return new WaitForSeconds(duration);
         _canMove = true;
     }
@@ -261,32 +291,5 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _canJump = true;
     }
 
-    private void StartJump(Vector3 nextBloodPool)
-    {
-        _jumpSound.Play();
-
-        StartCoroutine(DisableMovement(_jumpDuration));
-        _isJumping = true;
-        _jumpStart = transform.position;
-        _jumpEnd = nextBloodPool;
-        _canJump = false;
-
-        if(_playerShooting)
-        {
-            _playerShooting.CanShoot = false;
-        }
-    }
-
-    private void StopJump()
-    {
-        transform.position = _jumpEnd;
-        _isJumping = false;
-        _jumpTimer = 0;
-        StartCoroutine(JumpCooldown(_jumpCooldown));
-
-        if (_playerShooting)
-        {
-            _playerShooting.CanShoot = true;
-        }
-    }
+    
 }

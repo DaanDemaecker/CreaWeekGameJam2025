@@ -120,6 +120,93 @@ Transform:
   - {fileID: 6745821690183574459}
   m_Father: {fileID: 6513969642593458111}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2584026589426420907
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 967867413622998681}
+  - component: {fileID: 2576845190336222091}
+  - component: {fileID: 4237827223946741926}
+  m_Layer: 0
+  m_Name: mesh_demon_eyes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &967867413622998681
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2584026589426420907}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.0022447058, y: 0.100734115, z: 0.069480896}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 3719676325583367812}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &2576845190336222091
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2584026589426420907}
+  m_Mesh: {fileID: 7971448866293387658, guid: 4ff914c5ad337294cba8b5040c21850f, type: 3}
+--- !u!23 &4237827223946741926
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2584026589426420907}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: df2e02a3c79ce944389f5b594346032d, type: 2}
+  - {fileID: 2100000, guid: ef52d143f8731244a9c602d5a210fc53, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &2658066267975722943
 GameObject:
   m_ObjectHideFlags: 0
@@ -269,13 +356,11 @@ MonoBehaviour:
   _moveSpeed: 5
   _jumpDistance: 2
   _epsilon: 0.1
-  _jumpDuration: 0.7
-  _jumpHeight: 2
   _jumpSound: {fileID: 3106645849615422213}
   _moveSound: {fileID: 2193497836365303382}
   _bloodSplash: {fileID: 4489481157171107342}
-  _jumpDuration: 1
-  _jumpHeight: 0.5
+  _jumpDuration: 0.7
+  _jumpHeight: 2
   _jumpCurve:
     serializedVersion: 2
     m_Curve:
@@ -320,6 +405,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _bigProjectile: {fileID: 8635627062750407053, guid: 53f8adba850c06444a8984222f42d6a7, type: 3}
   _smallProjectile: {fileID: 19466675020254746, guid: 2213fb0528ebde84b95bb3f5735feec9, type: 3}
+  _shootCooldown: 0.5
 --- !u!1 &2664487318013015600
 GameObject:
   m_ObjectHideFlags: 0
@@ -352,7 +438,6 @@ Transform:
   - {fileID: 7770853372438668984}
   m_Father: {fileID: 1482986161930987834}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &4022012079029044618
 --- !u!1 &2789999534012977504
 GameObject:
   m_ObjectHideFlags: 0
@@ -725,7 +810,7 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!1 &4406875899457840498
+--- !u!1 &4022012079029044618
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -737,12 +822,12 @@ GameObject:
   - component: {fileID: 5531712136281943526}
   - component: {fileID: 2357191757700179711}
   m_Layer: 0
-  m_Name: mesh_demon_eyes
+  m_Name: 
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1373667406632671825
 Transform:
   m_ObjectHideFlags: 0
@@ -1047,6 +1132,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7074063476276537871}
+  - {fileID: 967867413622998681}
   m_Father: {fileID: 7770853372438668984}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7358417517065151245

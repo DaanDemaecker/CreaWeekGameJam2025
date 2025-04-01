@@ -2,7 +2,20 @@ using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
 {
-    private PlayerMovement _player = null;
+    private Transform _player = null;
+    public Transform Player
+    {
+        set
+        {
+            _player = value;
+
+            if (_player != null)
+            {
+                _cameraOffset = transform.position - _player.position;
+                _playerYPos = _player.position.y;
+            }
+        }
+    }
 
     private Vector3 _cameraOffset = Vector3.zero;
 
@@ -17,15 +30,8 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        _player = FindFirstObjectByType<PlayerMovement>();
 
         _yPos = transform.position.y;
-
-        if (_player != null)
-        {
-            _cameraOffset = transform.position - _player.transform.position;
-            _playerYPos = _player.transform.position.y;
-        }
     }
 
 
@@ -35,10 +41,10 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
         {
             _cameraOffset = Quaternion.AngleAxis(_updateAngle, Vector3.up) * _cameraOffset;
 
-            transform.position = _player.transform.position + _cameraOffset;
+            transform.position = _player.position + _cameraOffset;
             transform.position = new Vector3(transform.position.x, _yPos, transform.position.z);
 
-            transform.LookAt(new Vector3(_player.transform.position.x, _playerYPos, _player.transform.position.z));
+            transform.LookAt(new Vector3(_player.position.x, _playerYPos, _player.position.z));
         }
     }
 
