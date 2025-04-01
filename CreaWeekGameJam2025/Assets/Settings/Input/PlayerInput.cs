@@ -116,6 +116,45 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 }
             ]
+        },
+        {
+            ""name"": ""Jump"",
+            ""id"": ""d870e4d3-b850-4407-a44b-5fa668a64b75"",
+            ""actions"": [
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""4d203ca0-f523-409a-a722-b1961159983d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""c7bd5acc-f97e-4813-8341-fe8a002437f3"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d398f379-e513-41b8-bf42-4696582e8c57"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -123,11 +162,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         // Move
         m_Move = asset.FindActionMap("Move", throwIfNotFound: true);
         m_Move_Move = m_Move.FindAction("Move", throwIfNotFound: true);
+        // Jump
+        m_Jump = asset.FindActionMap("Jump", throwIfNotFound: true);
+        m_Jump_Jump = m_Jump.FindAction("Jump", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
     {
         UnityEngine.Debug.Assert(!m_Move.enabled, "This will cause a leak and performance issues, PlayerInput.Move.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Jump.enabled, "This will cause a leak and performance issues, PlayerInput.Jump.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -231,8 +274,58 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         }
     }
     public MoveActions @Move => new MoveActions(this);
+
+    // Jump
+    private readonly InputActionMap m_Jump;
+    private List<IJumpActions> m_JumpActionsCallbackInterfaces = new List<IJumpActions>();
+    private readonly InputAction m_Jump_Jump;
+    public struct JumpActions
+    {
+        private @PlayerInput m_Wrapper;
+        public JumpActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Jump => m_Wrapper.m_Jump_Jump;
+        public InputActionMap Get() { return m_Wrapper.m_Jump; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(JumpActions set) { return set.Get(); }
+        public void AddCallbacks(IJumpActions instance)
+        {
+            if (instance == null || m_Wrapper.m_JumpActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_JumpActionsCallbackInterfaces.Add(instance);
+            @Jump.started += instance.OnJump;
+            //@Jump.performed += instance.OnJump;
+            //@Jump.canceled += instance.OnJump;
+        }
+
+        private void UnregisterCallbacks(IJumpActions instance)
+        {
+            @Jump.started -= instance.OnJump;
+            //@Jump.performed -= instance.OnJump;
+            //@Jump.canceled -= instance.OnJump;
+        }
+
+        public void RemoveCallbacks(IJumpActions instance)
+        {
+            if (m_Wrapper.m_JumpActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IJumpActions instance)
+        {
+            foreach (var item in m_Wrapper.m_JumpActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_JumpActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public JumpActions @Jump => new JumpActions(this);
     public interface IMoveActions
     {
         void OnMove(InputAction.CallbackContext context);
+    }
+    public interface IJumpActions
+    {
+        void OnJump(InputAction.CallbackContext context);
     }
 }
