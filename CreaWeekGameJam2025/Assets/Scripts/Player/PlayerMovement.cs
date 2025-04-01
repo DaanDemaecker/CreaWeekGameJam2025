@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
+public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInput.IJumpActions
 {
     private PlayerInput _controls = null;
 
@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
     {
         _controls = new PlayerInput();
         _controls.Move.SetCallbacks(this);
+        _controls.Jump.SetCallbacks(this);
         _controls.Enable();
 
         _rigidbody = GetComponent<Rigidbody>();
@@ -25,17 +26,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
         _bloodLayerMask = LayerMask.GetMask("Blood");
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         var direction = context.ReadValue<Vector2>();
 
         _moveDirection = new Vector3(direction.x, 0, direction.y);
+
+        if (direction != Vector2.zero)
+        {
+            transform.forward = new Vector3(direction.x, 0, direction.y);
+        }
     }
 
     void FixedUpdate()
@@ -64,5 +64,10 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
         bool result = Physics.SphereCast(ray, 0.1f, 50, _bloodLayerMask);
 
         return result;
+    }
+
+    public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
+    {
+        
     }
 }
