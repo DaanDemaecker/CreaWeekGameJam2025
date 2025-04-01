@@ -72,13 +72,19 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             return;
         }
 
-        var direction = context.ReadValue<Vector2>();
+        var input = context.ReadValue<Vector2>();
+        var direction = new Vector3(input.x, 0, input.y);
 
-        _moveDirection = new Vector3(direction.x, 0, direction.y);
-
-        if (direction != Vector2.zero)
+        if(_camera != null)
         {
-            transform.forward = new Vector3(direction.x, 0, direction.y);
+            direction = _camera.RotateToCamera(direction);
+        }
+
+        _moveDirection = direction;
+
+        if (direction != Vector3.zero)
+        {
+            transform.forward = direction;
         }
     }
 

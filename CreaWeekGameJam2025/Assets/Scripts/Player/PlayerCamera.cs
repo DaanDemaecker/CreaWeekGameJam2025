@@ -48,4 +48,13 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
 
         _updateAngle = movement * _rotationSpeed;
     }
+
+    public Vector3 RotateToCamera(Vector3 input)
+    {
+        float angle = Vector3.SignedAngle(Vector3.forward, new Vector3(transform.forward.x, 0, transform.forward.z), Vector3.up);
+
+        Vector3 output = Quaternion.AngleAxis(angle, Vector3.up) * input;
+
+        return output;
+    }
 }
