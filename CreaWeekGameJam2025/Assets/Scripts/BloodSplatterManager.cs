@@ -13,6 +13,18 @@ public class BloodSplatterManager : MonoBehaviour
        layerMask = LayerMask.GetMask("Ground");
     }
 
+    private void OnEnable()
+    {
+        BleedingState.onSmallBloodDropped += SpawnBloodSplatter;
+        DyingState.onBigBloodDropped += SpawnBloodSplatter;
+    }
+
+    private void OnDisable()
+    {
+        BleedingState.onSmallBloodDropped -= SpawnBloodSplatter;
+        DyingState.onBigBloodDropped -= SpawnBloodSplatter;
+    }
+
     private void Update()
     {
         if(Input.GetMouseButtonDown(0))
@@ -21,17 +33,21 @@ public class BloodSplatterManager : MonoBehaviour
 
             if(Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out result, 100, layerMask))
             {
-                SpawnBloodSplatter(result.point);
+                SpawnBloodSplatter(result.point, 2);
             }
 
         }
     }
 
-    private void SpawnBloodSplatter(Vector3 pos)
+    private void SpawnBloodSplatter(Vector3 pos, float size)
     {
         if (_splatterPrefabs.Count > 0)
         {
-            Instantiate(_splatterPrefabs[Random.Range(0, _splatterPrefabs.Count)], pos, Quaternion.Euler(0, Random.Range(0, 360), 0));
+            var gameObject = Instantiate(_splatterPrefabs[Random.Range(0, _splatterPrefabs.Count)], pos, Quaternion.Euler(0, Random.Range(0, 360), 0));
+            if (gameObject != null)
+            {
+                gameObject.transform.localScale = Vector3.one * size;
+            }
         }
     }
 }
