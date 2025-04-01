@@ -294,15 +294,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             if (instance == null || m_Wrapper.m_JumpActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_JumpActionsCallbackInterfaces.Add(instance);
             @Jump.started += instance.OnJump;
-            //@Jump.performed += instance.OnJump;
-            //@Jump.canceled += instance.OnJump;
+            @Jump.performed += instance.OnJump;
+            @Jump.canceled += instance.OnJump;
         }
 
         private void UnregisterCallbacks(IJumpActions instance)
         {
             @Jump.started -= instance.OnJump;
-            //@Jump.performed -= instance.OnJump;
-            //@Jump.canceled -= instance.OnJump;
+            @Jump.performed -= instance.OnJump;
+            @Jump.canceled -= instance.OnJump;
         }
 
         public void RemoveCallbacks(IJumpActions instance)
