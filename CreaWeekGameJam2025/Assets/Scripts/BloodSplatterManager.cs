@@ -13,6 +13,18 @@ public class BloodSplatterManager : MonoBehaviour
        layerMask = LayerMask.GetMask("Ground");
     }
 
+    private void OnEnable()
+    {
+        BleedingState.onSmallBloodDropped += SpawnBloodSplatter;
+        DyingState.onBigBloodDropped += SpawnBloodSplatter;
+    }
+
+    private void OnDisable()
+    {
+        BleedingState.onSmallBloodDropped -= SpawnBloodSplatter;
+        DyingState.onBigBloodDropped -= SpawnBloodSplatter;
+    }
+
     private void Update()
     {
         if(Input.GetMouseButtonDown(0))
