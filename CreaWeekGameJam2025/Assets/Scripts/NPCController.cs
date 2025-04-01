@@ -59,17 +59,26 @@ public class EnterBuildingState : IState
     float speed = 2f;
     float dst = 3;
 
+    float hideLength = 5f;
+
     float time = 0;
+    float hideTime = 0;
 
     Vector3 startPos;
 
     Vector3 dir1;
     Vector3 dir2;
 
-    public EnterBuildingState(Vector3 startForward, NPCController ctx)
+    public EnterBuildingState(Vector3 startForward, Vector3 doorPosition, NPCController ctx)
     {
+        time = 0;
+
         context = ctx;
         startPos = context.transform.position;
+
+        dir1 = startForward;
+        dir2 = doorPosition - (context.transform.position + dir1);
+        dir2.y = 0;
     }   
     public void OnEnter()
     {
@@ -83,7 +92,28 @@ public class EnterBuildingState : IState
 
     public void OnUpdate()
     {
-        
+        time += Time.deltaTime;
+        if (time <= speed)
+        {
+            float normalizedTime = time / speed;
+
+            Vector3 pos1 = startPos + Vector3.Lerp(Vector3.zero, dir1, normalizedTime);
+            Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime);
+
+            Vector3 targetPosition = Vector3.Lerp(pos1, pos2, normalizedTime);
+
+            context.transform.position = targetPosition;
+        } else
+        {
+            context.transform.GetChild(0).gameObject.SetActive(false);
+            hideTime += Time.deltaTime;
+        }
+
+        if(hideTime >= hideLength)
+        {
+            context.transform.GetChild(0).gameObject.SetActive(true);
+            context.StateMachine.MoveToState(new WanderingState(-dir2, context));
+        }
     }
 }
 public class WanderingState : IState
@@ -91,7 +121,7 @@ public class WanderingState : IState
 
     NPCController context;
 
-    float speed = .5f;
+    float speed = 2f;
     float dst = 3;
 
     float time = 0;
@@ -158,20 +188,31 @@ public class WanderingState : IState
         }
         else
         {
-            if (BuildingNearby())
+            if (BuildingNearby(out Vector3 door))
             {
-
+                context.StateMachine.MoveToState(new EnterBuildingState(dir2, door, context));
+            } else
+            {
+                context.StateMachine.MoveToState(new WanderingState(dir2, context));
             }
-            context.StateMachine.MoveToState(new WanderingState(dir2, context));
+            
         }
         
     }
 
-    private bool BuildingNearby()
+    private bool BuildingNearby(out Vector3 door)
     {
-        Collider[] Buildings = Physics.OverlapSphere(startPos + dir1 + dir2, dst * 2, 1 << 16);
-        
+        door = Vector3.zero;
+        Collider[] Doors = Physics.OverlapSphere(startPos + dir1 + dir2, dst * 2, 1 << 17);
 
+        Debug.Log("Found " + Doors.Length + " doors");
+
+        //if(Doors.Length >= 1)
+        if(Doors.Length > 0 && Random.Range(0,1f) > .8f)
+        {
+            door = Doors[(int)Random.Range(0, Doors.Length)].transform.position;
+            return true;
+        } 
 
         return false;
 
