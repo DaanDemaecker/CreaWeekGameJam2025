@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private Rigidbody _rigidbody = null;
 
     private Vector3 _moveDirection = Vector3.zero;
+    private float _moveMagnitude = 0f;
 
     private PlayerShooting _playerShooting = null;
 
@@ -94,6 +95,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         }
 
         var input = context.ReadValue<Vector2>();
+
+        _moveMagnitude = input.magnitude;
+
         var direction = new Vector3(input.x, 0, input.y);
 
         if(_camera != null)
@@ -137,7 +141,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         {
             _moveDirection.y = 0;
             _moveDirection.Normalize();
-            _moveDirection *= _moveSpeed;
+            _moveDirection *= _moveMagnitude * _moveSpeed;
 
             if(!IsMoveDirectionValid())
             {
@@ -161,17 +165,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        _jumpSound.Play();
-        
-        if(!_canJump)
-=======
         if(!_canJump || !context.started)
->>>>>>> Stashed changes
-=======
-        if(!_canJump || !context.started)
->>>>>>> Stashed changes
         {
             return;
         }
@@ -181,21 +175,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         if (nextBloodPool != Vector3.zero)
         {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            transform.position = nextBloodPool;
-            _bloodSplash.Play();
-            StartCoroutine(DisableMovement(_jumpDuration));
-            _isJumping = true;
-            _jumpStart = transform.position;
-            _jumpEnd = nextBloodPool;
-            _canJump = false;
-=======
             StartJump(nextBloodPool);
->>>>>>> Stashed changes
-=======
-            StartJump(nextBloodPool);
->>>>>>> Stashed changes
         }
     }
 
@@ -257,6 +237,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     private void StartJump(Vector3 nextBloodPool)
     {
+        _jumpSound.Play();
+
         StartCoroutine(DisableMovement(_jumpDuration));
         _isJumping = true;
         _jumpStart = transform.position;
