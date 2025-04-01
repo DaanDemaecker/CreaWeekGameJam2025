@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
     {
         Ray ray = new Ray(transform.position + _moveDirection * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
-        bool result = Physics.Raycast(ray, 50, _bloodLayerMask);
+        bool result = Physics.SphereCast(ray, 0.1f, 50, _bloodLayerMask);
 
         return result;
     }
