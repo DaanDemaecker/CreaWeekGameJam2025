@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3541801449355502401}
   - component: {fileID: 243270776562049290}
   - component: {fileID: 8364870274948353690}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Splatter (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -122,7 +122,7 @@ GameObject:
   - component: {fileID: 788699273094827331}
   - component: {fileID: 6637206748188543615}
   - component: {fileID: 2620017591310367427}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Splatter (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -232,7 +232,7 @@ GameObject:
   - component: {fileID: 1455493368819448357}
   - component: {fileID: 3095489648088111371}
   - component: {fileID: 3719281113359279219}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Splatter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -342,7 +342,7 @@ GameObject:
   - component: {fileID: 7879617864777468083}
   - component: {fileID: 4693762184250337404}
   - component: {fileID: 4122422987547863512}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Splatter (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -449,7 +449,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 550019912517897011}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: BloodSplatter1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

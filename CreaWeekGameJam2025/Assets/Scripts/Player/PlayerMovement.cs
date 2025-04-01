@@ -11,6 +11,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
     [SerializeField]
     private float _moveSpeed = 10.0f;
 
+    int _bloodLayerMask = 0;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -19,6 +21,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
         _controls.Enable();
 
         _rigidbody = GetComponent<Rigidbody>();
+
+        _bloodLayerMask = LayerMask.GetMask("Blood");
     }
 
     // Update is called once per frame
@@ -31,23 +35,18 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
     {
         var direction = context.ReadValue<Vector2>();
 
-        Debug.Log(direction);
-
         _moveDirection = new Vector3(direction.x, 0, direction.y);
-
     }
 
     void FixedUpdate()
     {
-        if(_rigidbody != null)
+        if (_rigidbody != null)
         {
-            if (IsMoveDirectionValid())
-            {
-                _moveDirection.y = 0;
-                _moveDirection.Normalize();
-                _moveDirection *= _moveSpeed;
-            }
-            else
+            _moveDirection.y = 0;
+            _moveDirection.Normalize();
+            _moveDirection *= _moveSpeed;
+
+            if(!IsMoveDirectionValid())
             {
                 _moveDirection.x = 0;
                 _moveDirection.z = 0;
@@ -60,8 +59,10 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions
 
     bool IsMoveDirectionValid()
     {
+        Ray ray = new Ray(transform.position + _moveDirection * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
+        bool result = Physics.Raycast(ray, 50, _bloodLayerMask);
 
-        return true;
+        return result;
     }
 }
