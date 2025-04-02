@@ -41,6 +41,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private VisualEffect _bloodSplash;
 
     [SerializeField]
+    private VisualEffect _death;
+
+    [SerializeField]
     private float _jumpDuration = 0.5f;
 
     [SerializeField]
@@ -109,6 +112,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _bloodLayerMask = LayerMask.GetMask("Blood");
 
         _bloodSplash.Stop();
+        _death.Stop();
     }
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
@@ -195,6 +199,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     IEnumerator Jump(Vector3 nextBloodpool)
     {
         //animations and sound
+        _bloodSplash.SetBool("HeavySplash", false);
         _bloodSplash.Play();
         
         // start jumping
@@ -225,7 +230,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                         BodyParts[i].transform.localPosition = Vector3.zero +
                             (i * Vector3.down * .4f);
                     }
-
+                    _death.Play();
+                    yield return new WaitForEndOfFrame();
                     transform.position = _jumpStart;
                     animate = false;
                 }
@@ -234,6 +240,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 if (doFX)
                 {
                     doFX = false;
+                    _bloodSplash.SetBool("HeavySplash", true);
                     _bloodSplash.Play();
                     _jumpSound.Play();
                 }
