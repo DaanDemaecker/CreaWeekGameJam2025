@@ -21,6 +21,10 @@ public class NPCController : MonoBehaviour
     float bloodCooldown = 0;
     float bloodTimer = 0;
 
+    float bleedingTime = 5.0f;
+    float bleedingTimer = 0.0f;
+    bool isDead = false;
+
     public delegate void SmallBloodDropped(Vector3 pos, float size);
     public static event SmallBloodDropped onSmallBloodDropped;
 
@@ -59,6 +63,15 @@ public class NPCController : MonoBehaviour
         if (bloodTimer > bloodCooldown)
         {
             DropBlood();
+        }
+
+        if(!isDead)
+        {
+            bleedingTimer += Time.deltaTime;
+            if(bleedingTimer >= bleedingTime)
+            {
+                StateMachine.MoveToState(new DeadNPCState(this));
+            }
         }
     }
 
@@ -116,12 +129,12 @@ public class DeadNPCState : IState
 
     public void OnExit()
     {
-        throw new System.NotImplementedException();
+        //throw new System.NotImplementedException();
     }
 
     public void OnUpdate()
     {
-        throw new System.NotImplementedException();
+        //throw new System.NotImplementedException();
     }
 }
 public class EnterBuildingState : IState

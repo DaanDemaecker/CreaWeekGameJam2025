@@ -270,12 +270,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             yield return null;
         }
 
-        if (_playerShooting)
-        {
-            _playerShooting.ShootInhibitor -= 1;
-        }
-
-
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
