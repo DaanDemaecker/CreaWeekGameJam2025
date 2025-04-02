@@ -38,12 +38,12 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
         {
             if (!npc.IsBleeding)
             {
-                npc.StateMachine.MoveToState(new DeadNPCState(npc));
+                npc.StateMachine.MoveToState(new DeadNPCState(transform.position, npc));
             }
         }
     }
 
-    private IEnumerator TauntCooldown(float duration)
+    private IEnumerator MeleeCooldown(float duration)
     {
         _canAttack = false;
         yield return new WaitForSeconds(duration);
