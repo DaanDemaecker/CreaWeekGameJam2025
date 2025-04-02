@@ -72,7 +72,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
 
-        _playerShooting = GetComponent<PlayerShooting>();
+        _playerShooting = GetComponentInChildren<PlayerShooting>();
 
         if (_playerShooting != null)
         {
