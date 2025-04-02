@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 {
@@ -12,6 +13,15 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 
     [SerializeField]
     private float _tauntRange = 15.0f;
+
+    [SerializeField]
+    private VisualEffect _taunt;
+
+
+    public void Start()
+    {
+        _taunt.Stop();
+    }
 
     public void OnTaunt(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
@@ -51,6 +61,8 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
                 npc.StateMachine.MoveToState(new ChasingState(transform, npc));
             }
         }
+
+        _taunt.Play();
     }
 
     NPCController GetClosestNpc()

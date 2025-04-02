@@ -45,13 +45,15 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
 
         foreach (var npc in npcsInRange)
         {
-            
+
             npc.StateMachine.MoveToState(new DeadNPCState(transform.position, npc));
-            
+
         }
 
         //animation and SFX
         _melee.Play();
+
+        StartCoroutine(MeleeCooldown(_meleeCooldown));
     }
 
     private IEnumerator MeleeCooldown(float duration)

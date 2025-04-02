@@ -167,10 +167,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 velocity = velocity.normalized * magnitude;
             }
 
-            if(!_isJumping && !IsMoveDirectionValid(_moveDirection, out Vector3 newvel))
+            if(!_isJumping && !IsMoveDirectionValid(velocity))
             {
-               velocity = newvel;
-                
+               velocity = Vector3.zero;
             }
 
             _rigidbody.linearVelocity = velocity;
@@ -187,10 +186,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
 
     }
-    [SerializeField] float dst;
-    bool IsMoveDirectionValid(Vector3 direction, out Vector3 newDirection)
+
+    bool IsMoveDirectionValid(Vector3 direction)
     {
-        newDirection = Vector3.zero;    
         Ray ray = new Ray(transform.position + direction * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
         if (Physics.Raycast(transform.position, direction, dst, 1 << 16))

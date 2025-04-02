@@ -5,6 +5,9 @@ public class HUD : MonoBehaviour
 {
     [SerializeField]
     private PlayerMovement _player;
+
+    [SerializeField]
+    private PlayerBloodTracker _bloodTracker;
     
     private VisualElement _ui;
 
@@ -18,6 +21,14 @@ public class HUD : MonoBehaviour
     private void OnEnable()
     {
         _blood = _ui.Q<ProgressBar>("Bloodbar");
-        //_blood.value = _player.bloodCount;
+        _blood.value = _blood.highValue;
+    }
+
+    private void LateUpdate()
+    {
+        if (_blood != null && _bloodTracker != null)
+        {
+            _blood.value = _bloodTracker.BloodPercentage * _blood.highValue;
+        }
     }
 }
