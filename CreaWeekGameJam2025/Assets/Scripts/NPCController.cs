@@ -6,12 +6,13 @@ using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.Rendering.Universal.Internal;
 
 public class NPCController : MonoBehaviour
 {
     [HideInInspector] public StateMachine StateMachine;
 
-    [SerializeField] public UnityEvent OnDeath;
+    [SerializeField] public UnityEvent<bool> OnDeath;
 
     // Bleeding variables
     float minDelay = 1.5f;
@@ -26,6 +27,7 @@ public class NPCController : MonoBehaviour
     bool isDead = false;
     public bool IsDead
     {
+        set { isDead = value; }
         get { return isDead; }
     }
 
@@ -74,8 +76,8 @@ public class NPCController : MonoBehaviour
             bleedingTimer += Time.deltaTime;
             if(bleedingTimer >= bleedingTime)
             {
-                isDead = true;
-                StateMachine.MoveToState(new DeadNPCState(this));
+                var player = FindFirstObjectByType<PlayerMovement>();
+                StateMachine.MoveToState(new DeadNPCState(player.transform.position, this));
             }
         }
     }
@@ -121,22 +123,35 @@ public interface IState
 }
 public class DeadNPCState : IState
 {
-    float bloodSize = 3.0f;
+    float _bloodSize = 3.0f;
+    Vector3 _playerPos;
+
+    bool _isRotating = true;
+
+    float _degPerSecond = 180.0f;
 
     public delegate void SmallBloodDropped(Vector3 pos, float size);
     public static event SmallBloodDropped onBloodDropped;
 
     NPCController context;
-    public DeadNPCState(NPCController ctx)
+    public DeadNPCState(Vector3 playerPos, NPCController ctx)
     {
+        _playerPos = playerPos;
         context = ctx;
     }
     public void OnEnter()
     {
-        context.OnDeath.Invoke();
-        context.transform.localScale = new Vector3(1, .1f, 1);
+        context.OnDeath.Invoke(true);
 
-        onBloodDropped.Invoke(context.transform.position, bloodSize);
+        context.IsDead = true;
+
+        onBloodDropped.Invoke(context.transform.position, _bloodSize);
+    }
+
+    private void EndRotation()
+    {
+        _isRotating = false;
+        context.transform.localScale = new Vector3(1, .1f, 1);
     }
 
     public void OnExit()
@@ -146,7 +161,20 @@ public class DeadNPCState : IState
 
     public void OnUpdate()
     {
-        //throw new System.NotImplementedException();
+        if (_isRotating)
+        {
+            var forward = context.transform.forward;
+            var target = _playerPos - context.transform.position;
+            forward = Vector3.RotateTowards(forward, target, _degPerSecond * Mathf.Deg2Rad * Time.deltaTime, 0);
+            context.transform.forward = forward;
+
+            float currAngle = Vector3.Angle(forward, target);
+
+            if (currAngle <= 0.5f)
+            {
+                EndRotation();
+            }
+        }
     }
 }
 public class EnterBuildingState : IState
