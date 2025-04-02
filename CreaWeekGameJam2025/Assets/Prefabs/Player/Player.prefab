@@ -623,6 +623,7 @@ MonoBehaviour:
   - {fileID: 836643090266919079}
   - {fileID: 6745821690183574459}
   _jumpCooldown: 0.25
+  dst: 0
   _offsetStep: 0.1
 --- !u!114 &7263415789913387942
 MonoBehaviour:
@@ -683,6 +684,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 262f12a4e6e250d4886b378e4fc53b44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnDeath:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  _countEnemyHit: 1
 --- !u!1 &2664487318013015600
 GameObject:
   m_ObjectHideFlags: 0
