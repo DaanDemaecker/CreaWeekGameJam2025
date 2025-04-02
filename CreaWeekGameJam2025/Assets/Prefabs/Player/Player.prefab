@@ -1,5 +1,77 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &480352903471972617
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8232121626424064860}
+  - component: {fileID: 1360903772919546752}
+  - component: {fileID: 3043013968224336460}
+  m_Layer: 0
+  m_Name: Shooting
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8232121626424064860
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 480352903471972617}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1482986161930987834}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1360903772919546752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 480352903471972617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5c91ea6b4e12f04981bf49589172c7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bigProjectile: {fileID: 0}
+  _smallProjectile: {fileID: 19466675020254746, guid: 2213fb0528ebde84b95bb3f5735feec9, type: 3}
+  _shootCooldown: 0.5
+  _maxAngle: 45
+  _maxDistance: 15
+  _currentTarget: {fileID: 0}
+--- !u!135 &3043013968224336460
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 480352903471972617}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 15
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &991665601237874274
 GameObject:
   m_ObjectHideFlags: 0
@@ -11,7 +83,7 @@ GameObject:
   - component: {fileID: 803590192241172065}
   - component: {fileID: 2596084628662236467}
   - component: {fileID: 3364537171306908122}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mesh_demon_body_down
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -131,7 +203,7 @@ GameObject:
   - component: {fileID: 967867413622998681}
   - component: {fileID: 2576845190336222091}
   - component: {fileID: 4237827223946741926}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mesh_demon_eyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -220,7 +292,6 @@ GameObject:
   - component: {fileID: 8986004747834403241}
   - component: {fileID: 4827856412058249944}
   - component: {fileID: 4437205709745159250}
-  - component: {fileID: 7772073094540610975}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -246,6 +317,7 @@ Transform:
   - {fileID: 3788385634390622147}
   - {fileID: 5808039211406296608}
   - {fileID: 8749518911339898063}
+  - {fileID: 8232121626424064860}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!135 &5658549574580955538
@@ -392,21 +464,6 @@ MonoBehaviour:
   - {fileID: 6745821690183574459}
   _jumpCooldown: 0.25
   _offsetStep: 0.1
---- !u!114 &7772073094540610975
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2658066267975722943}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5c91ea6b4e12f04981bf49589172c7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _bigProjectile: {fileID: 8635627062750407053, guid: 53f8adba850c06444a8984222f42d6a7, type: 3}
-  _smallProjectile: {fileID: 19466675020254746, guid: 2213fb0528ebde84b95bb3f5735feec9, type: 3}
-  _shootCooldown: 0.5
 --- !u!1 &2664487318013015600
 GameObject:
   m_ObjectHideFlags: 0
@@ -822,7 +879,7 @@ GameObject:
   - component: {fileID: 1373667406632671825}
   - component: {fileID: 5531712136281943526}
   - component: {fileID: 2357191757700179711}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: 
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -909,7 +966,7 @@ GameObject:
   - component: {fileID: 6359921050523625976}
   - component: {fileID: 7927122527883349269}
   - component: {fileID: 3613384193838111954}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mesh_demon_body_middle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1027,7 +1084,7 @@ GameObject:
   - component: {fileID: 7074063476276537871}
   - component: {fileID: 1220812035407551625}
   - component: {fileID: 8766760977634541761}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mesh_demon_head
   m_TagString: Untagged
   m_Icon: {fileID: 0}

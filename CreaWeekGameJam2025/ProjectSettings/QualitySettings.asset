@@ -75,7 +75,7 @@ QualitySettings:
     globalTextureMipmapLimit: 0
     textureMipmapLimitSettings: []
     anisotropicTextures: 2
-    antiAliasing: 0
+    antiAliasing: 4
     softParticles: 0
     softVegetation: 1
     realtimeReflectionProbes: 0
@@ -105,10 +105,10 @@ QualitySettings:
     terrainPixelError: 1
     terrainDetailDensityScale: 1
     terrainBasemapDistance: 1000
-    terrainDetailDistance: 80
+    terrainDetailDistance: 65
     terrainTreeDistance: 5000
     terrainBillboardStart: 50
-    terrainFadeLength: 5
+    terrainFadeLength: 0
     terrainMaxTrees: 50
     excludedTargetPlatforms:
     - Android

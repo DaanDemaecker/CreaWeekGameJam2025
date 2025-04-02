@@ -8,7 +8,8 @@ public class SmallProjectile : MonoBehaviour
 
         if (npc != null)
         {
-            npc.StateMachine.MoveToState(new BleedingState(Vector3.zero, 0, npc));
+            npc.IsBleeding = true;
+            Destroy(gameObject);
         }
     }
 }

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using static DyingState;
 
 public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 {

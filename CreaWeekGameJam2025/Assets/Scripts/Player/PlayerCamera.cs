@@ -41,10 +41,9 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
         {
             _cameraOffset = Quaternion.AngleAxis(_updateAngle, Vector3.up) * _cameraOffset;
 
-            transform.position = _player.position + _cameraOffset;
-            transform.position = new Vector3(transform.position.x, _yPos, transform.position.z);
+            transform.position = Vector3.Lerp(transform.position, _player.position, Time.deltaTime * 3);
 
-            transform.LookAt(new Vector3(_player.position.x, _playerYPos, _player.position.z));
+            //transform.LookAt(new Vector3(_player.position.x, _playerYPos, _player.position.z));
         }
     }
 

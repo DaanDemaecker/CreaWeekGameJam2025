@@ -1,0 +1,122 @@
+.background {
+    background-color: rgba(8, 0, 14, 0.6);
+    border-top-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+    border-left-width: 5px;
+    border-left-color: rgba(18, 0, 22, 0.46);
+    border-right-color: rgba(18, 0, 22, 0.46);
+    border-top-color: rgba(18, 0, 22, 0.46);
+    border-bottom-color: rgba(18, 0, 22, 0.46);
+}
+
+.frame {
+    background-color: rgb(255, 255, 255);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+.unity-button {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    background-color: rgba(152, 152, 152, 0.24);
+    border-top-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+    border-left-width: 5px;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    padding-top: 20px;
+    padding-right: 40px;
+    padding-bottom: 20px;
+    padding-left: 40px;
+    -unity-font-style: normal;
+    font-size: 50px;
+    transition-timing-function: ease-out-bounce;
+    transition-delay: 0s;
+    transition-duration: 0.1s;
+}
+
+.unity-button:hover {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    background-color: rgb(226, 76, 76);
+    border-top-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+    border-left-width: 5px;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    padding-top: 20px;
+    padding-right: 40px;
+    padding-bottom: 20px;
+    padding-left: 40px;
+    -unity-font-style: normal;
+    font-size: 50px;
+    scale: 1.2 1.2;
+    transition-timing-function: ease-in-bounce;
+    transition-delay: 0s;
+    transition-duration: 0.1s;
+}
+
+.unity-button:focus {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    background-color: rgb(226, 76, 76);
+    border-top-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+    border-left-width: 5px;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    padding-top: 20px;
+    padding-right: 40px;
+    padding-bottom: 20px;
+    padding-left: 40px;
+    -unity-font-style: normal;
+    font-size: 50px;
+    scale: 1.2 1.2;
+    transition-timing-function: ease-in-bounce;
+    transition-delay: 0s;
+    transition-duration: 0.1s;
+}
+
+.unity-button:active {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    background-color: rgb(173, 42, 42);
+    border-top-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+    border-left-width: 5px;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    padding-top: 20px;
+    padding-right: 40px;
+    padding-bottom: 20px;
+    padding-left: 40px;
+    -unity-font-style: normal;
+    font-size: 50px;
+    scale: 0.8 0.8;
+    transition-timing-function: ease-in-bounce;
+    transition-delay: 0s;
+    transition-duration: 0.1s;
+}

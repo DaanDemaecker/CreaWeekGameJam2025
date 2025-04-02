@@ -8,7 +8,7 @@ public class BigProjectile : MonoBehaviour
 
         if (npc != null)
         {
-            npc.StateMachine.MoveToState(new DyingState(npc));
+           //npc.StateMachine.MoveToState(new DyingState(npc));
         }
     }
 }

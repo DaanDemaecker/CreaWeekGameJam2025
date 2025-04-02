@@ -222,15 +222,6 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             ""id"": ""6915721d-0ed3-4c62-8e82-fed4268f5b03"",
             ""actions"": [
                 {
-                    ""name"": ""ShootBig"",
-                    ""type"": ""Button"",
-                    ""id"": ""528ae118-2abb-44be-9380-1bba2d453dfb"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""ShootSmall"",
                     ""type"": ""Button"",
                     ""id"": ""6caed2b0-6013-4d57-a914-4e112e1433cb"",
@@ -241,39 +232,6 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 }
             ],
             ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""6d50708b-3a94-4a71-ac1a-218cc2ddbded"",
-                    ""path"": ""<Gamepad>/buttonNorth"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ShootBig"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""4bc9bfe0-9d81-489b-90ee-c01b587345c6"",
-                    ""path"": ""<Keyboard>/upArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ShootBig"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""cb3b57da-e821-4ebb-98d1-c214cff29c3f"",
-                    ""path"": ""<Gamepad>/rightTrigger"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ShootBig"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
                 {
                     ""name"": """",
                     ""id"": ""2924f604-8f96-4656-a938-ee43bb1b5ec1"",
@@ -362,7 +320,6 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_RotateCamera_Newaction = m_RotateCamera.FindAction("New action", throwIfNotFound: true);
         // Shoot
         m_Shoot = asset.FindActionMap("Shoot", throwIfNotFound: true);
-        m_Shoot_ShootBig = m_Shoot.FindAction("ShootBig", throwIfNotFound: true);
         m_Shoot_ShootSmall = m_Shoot.FindAction("ShootSmall", throwIfNotFound: true);
         // Taunt
         m_Taunt = asset.FindActionMap("Taunt", throwIfNotFound: true);
@@ -575,13 +532,11 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     // Shoot
     private readonly InputActionMap m_Shoot;
     private List<IShootActions> m_ShootActionsCallbackInterfaces = new List<IShootActions>();
-    private readonly InputAction m_Shoot_ShootBig;
     private readonly InputAction m_Shoot_ShootSmall;
     public struct ShootActions
     {
         private @PlayerInput m_Wrapper;
         public ShootActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
-        public InputAction @ShootBig => m_Wrapper.m_Shoot_ShootBig;
         public InputAction @ShootSmall => m_Wrapper.m_Shoot_ShootSmall;
         public InputActionMap Get() { return m_Wrapper.m_Shoot; }
         public void Enable() { Get().Enable(); }
@@ -592,9 +547,6 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_ShootActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_ShootActionsCallbackInterfaces.Add(instance);
-            @ShootBig.started += instance.OnShootBig;
-            @ShootBig.performed += instance.OnShootBig;
-            @ShootBig.canceled += instance.OnShootBig;
             @ShootSmall.started += instance.OnShootSmall;
             @ShootSmall.performed += instance.OnShootSmall;
             @ShootSmall.canceled += instance.OnShootSmall;
@@ -602,9 +554,6 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
 
         private void UnregisterCallbacks(IShootActions instance)
         {
-            @ShootBig.started -= instance.OnShootBig;
-            @ShootBig.performed -= instance.OnShootBig;
-            @ShootBig.canceled -= instance.OnShootBig;
             @ShootSmall.started -= instance.OnShootSmall;
             @ShootSmall.performed -= instance.OnShootSmall;
             @ShootSmall.canceled -= instance.OnShootSmall;
@@ -685,7 +634,6 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     }
     public interface IShootActions
     {
-        void OnShootBig(InputAction.CallbackContext context);
         void OnShootSmall(InputAction.CallbackContext context);
     }
     public interface ITauntActions

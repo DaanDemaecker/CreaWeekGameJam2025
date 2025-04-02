@@ -9,6 +9,15 @@ public class Projectile : MonoBehaviour
     [SerializeField]
     private float _lifeTime = 5f;
 
+    private Transform _target;
+    public Transform Target
+    {
+        set
+        {
+            _target = value;
+        }
+    }
+
     private void Start()
     {
         StartCoroutine(KillRoutine(_lifeTime));
@@ -27,6 +36,15 @@ public class Projectile : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         Destroy(gameObject);
+    }
+
+    private void Update()
+    {
+        if (_target != null)
+        {
+            transform.forward = _target.position + Vector3.up - transform.position;
+            SetVelocity();
+        }
     }
 
 }
