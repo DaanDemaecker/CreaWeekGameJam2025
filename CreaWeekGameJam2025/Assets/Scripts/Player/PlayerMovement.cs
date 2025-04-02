@@ -189,6 +189,11 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _canJump = false;
         //_canMove = false;
 
+        if (_playerShooting)
+        {
+            _playerShooting.ShootInhibitor += 1;
+        }
+
         Vector3 _jumpStart = transform.position;
 
         bool animate = true;
