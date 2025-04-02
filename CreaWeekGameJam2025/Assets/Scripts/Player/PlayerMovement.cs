@@ -128,11 +128,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             }
 
             _moveDirection = direction;
-
-            if (direction != Vector3.zero)
-            {
-                transform.forward = direction;
-            }
         }
         else if(context.canceled)
         {
@@ -175,6 +170,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _rigidbody.linearVelocity = velocity;
 
         }
+
+        //rotate the player in the direction they are moving
+        if (_rigidbody.linearVelocity != Vector3.zero)
+        {
+            transform.forward = _rigidbody.linearVelocity;
+        }
+
+        //sound
+        _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
+
     }
 
     bool IsMoveDirectionValid(Vector3 direction)
@@ -189,7 +194,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     float _offsetStep = .55f;
     IEnumerator Jump(Vector3 nextBloodpool)
     {
-
+        //animations and sound
+        _bloodSplash.Play();
+        
         // start jumping
         _isJumping = true;
         _canJump = false;
@@ -198,6 +205,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         Vector3 _jumpStart = transform.position;
 
         bool animate = true;
+        bool doFX = true;
 
         // actual jumping
         float startTime = Time.time;
@@ -220,9 +228,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
                     transform.position = _jumpStart;
                     animate = false;
-
-
                 }
+
+                //animations and sound
+                if (doFX)
+                {
+                    doFX = false;
+                    _bloodSplash.Play();
+                    _jumpSound.Play();
+                }
+
             }
 
             if(lerpFactor >= 1.2f)
