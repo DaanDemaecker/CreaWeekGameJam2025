@@ -133,39 +133,42 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         if (_rigidbody != null)
         {
-            if (!_isJumping)
+            var velocity = _rigidbody.linearVelocity;
+
+            if (_directionHeld)
             {
-                var velocity = _rigidbody.linearVelocity;
+                velocity += _moveDirection * Time.fixedDeltaTime * _accelerationIncrease;
 
-                if (_directionHeld)
-                {
-                    velocity += _moveDirection * Time.fixedDeltaTime * _accelerationIncrease;
+                var magnitude = velocity.magnitude;
 
-                    var magnitude = velocity.magnitude;
+                magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
 
-                    magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
-
-                    velocity = velocity.normalized * magnitude;
-                }
-                else
-                {
-                    var magnitude = velocity.magnitude;
-
-                    magnitude -= _accelerationIncrease * Time.fixedDeltaTime;
-
-                    magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
-
-                    velocity = velocity.normalized * magnitude;
-                }
-
-                _rigidbody.linearVelocity = velocity;
+                velocity = velocity.normalized * magnitude;
             }
+            else
+            {
+                var magnitude = velocity.magnitude;
+
+                magnitude -= _accelerationIncrease * Time.fixedDeltaTime;
+
+                magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
+
+                velocity = velocity.normalized * magnitude;
+            }
+
+            if(!_isJumping && !IsMoveDirectionValid(velocity))
+            {
+               velocity = Vector3.zero;
+            }
+
+            _rigidbody.linearVelocity = velocity;
+
         }
     }
 
     bool IsMoveDirectionValid(Vector3 direction)
     {
-        Ray ray = new Ray(transform.position + direction.normalized * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
+        Ray ray = new Ray(transform.position + direction * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
         return result;
