@@ -9,6 +9,13 @@ public class SmallProjectile : MonoBehaviour
         if (npc != null)
         {
             npc.IsBleeding = true;
+
+            Vector3 direction = transform.position - npc.transform.position;
+
+            direction.y = 0;
+
+            npc.StateMachine.MoveToState(new WanderingState(direction, npc));
+
             Destroy(gameObject);
         }
     }
