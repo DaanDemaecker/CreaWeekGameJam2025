@@ -309,6 +309,9 @@ public class WanderingState : IState
 
             Vector3 targetPosition = Vector3.Lerp(pos1,pos2,normalizedTime);
 
+            Vector3 direction = targetPosition - context.transform.position;
+            context.transform.forward = direction;
+
             context.transform.position = targetPosition;
 
         }
