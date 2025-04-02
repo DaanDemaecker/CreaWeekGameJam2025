@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 public class PlayerBloodTracker : MonoBehaviour
 {
@@ -73,6 +74,8 @@ public class PlayerBloodTracker : MonoBehaviour
         Debug.Log("Player died");
         OnDeath.Invoke(this);
         _isDead = true;
+
+        StartCoroutine(DeathScreen(1.5f));
     }
 
     private void EnemyHit()
@@ -91,6 +94,12 @@ public class PlayerBloodTracker : MonoBehaviour
     private void FillBar()
     {
         _currBlood = _maxBlood;
+    }
+
+    private IEnumerator DeathScreen(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene("EndScene");
     }
 
 }
