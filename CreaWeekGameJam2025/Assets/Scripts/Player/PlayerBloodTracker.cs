@@ -1,0 +1,88 @@
+using System;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.Events;
+
+public class PlayerBloodTracker : MonoBehaviour
+{
+    [SerializeField] public UnityEvent<bool> OnDeath;
+
+    private float _maxBlood = 100.0f;
+    private float _currBlood = 100.0f;
+    private float _depletionSpeed = 100.0f / 30.0f;
+
+    private bool _isDead = false;
+
+    [SerializeField]
+    private bool _countEnemyHit = true;
+
+    private void Start()
+    {
+        _currBlood = _maxBlood;
+
+        StartCoroutine(BloodDepletion());
+    }
+
+    private void OnEnable()
+    {
+        SmallProjectile.onEnemyHit += EnemyHit;
+        DeadNPCState.onEnemyKilled += EnemyKilled;
+    }
+
+    private void OnDisable()
+    {
+        SmallProjectile.onEnemyHit -= EnemyHit;
+        DeadNPCState.onEnemyKilled -= EnemyKilled;
+    }
+
+    private IEnumerator BloodDepletion()
+    {
+        while(!_isDead)
+        {
+            _currBlood -= _depletionSpeed * Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if(!_isDead)
+        {
+            CheckMeter();
+        }
+    }
+
+    private void CheckMeter()
+    {
+        if(_currBlood <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        Debug.Log("Player died");
+        OnDeath.Invoke(this);
+        _isDead = true;
+    }
+
+    private void EnemyHit()
+    {
+        if(_countEnemyHit)
+        {
+            FillBar();
+        }
+    }
+
+    private void EnemyKilled()
+    {
+        FillBar();
+    }
+
+    private void FillBar()
+    {
+        _currBlood = _maxBlood;
+    }
+
+}

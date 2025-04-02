@@ -73,9 +73,7 @@ public class NPCController : MonoBehaviour
         {
             
             HandleBleeding();
-        }
-
-       
+        }  
     }
 
     public void Destroy()
@@ -154,6 +152,9 @@ public class DeadNPCState : IState
     public delegate void SmallBloodDropped(Vector3 pos, float size);
     public static event SmallBloodDropped onBloodDropped;
 
+    public delegate void EnemyKilled();
+    public static event EnemyKilled onEnemyKilled;
+
     NPCController context;
     public DeadNPCState(Vector3 playerPos, NPCController ctx)
     {
@@ -163,6 +164,8 @@ public class DeadNPCState : IState
     public void OnEnter()
     {
         context.OnDeath.Invoke(true);
+
+        onEnemyKilled.Invoke();
 
         context.IsDead = true;
 

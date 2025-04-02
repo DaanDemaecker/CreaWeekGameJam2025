@@ -110,6 +110,23 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         _bloodSplash.Stop();
     }
+
+    public void OnEnable()
+    {
+        if (_controls != null)
+        {
+            _controls.Enable();
+        }
+    }
+
+    public void OnDisable()
+    {
+        if (_controls != null)
+        {
+            _controls.Disable();
+        }
+    }
+
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         if (context.performed)

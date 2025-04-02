@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class SmallProjectile : MonoBehaviour
 {
+    public delegate void EnemyHit();
+    public static event EnemyHit onEnemyHit;
+
     private void OnTriggerEnter(Collider other)
     {
         var npc = other.GetComponentInParent<NPCController>();
@@ -15,6 +18,8 @@ public class SmallProjectile : MonoBehaviour
             direction.y = 0;
 
             npc.StateMachine.MoveToState(new WanderingState(direction, npc));
+
+            onEnemyHit.Invoke();
 
             Destroy(gameObject);
         }
