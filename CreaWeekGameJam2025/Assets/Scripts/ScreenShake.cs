@@ -30,7 +30,7 @@ public class ScreenShake : MonoBehaviour
 
     IEnumerator Shaking()
     {
-        Vector3 startPosition = transform.position;
+        Vector3 startPosition = transform.localPosition;
         float elapsedTIme = 0f;
 
         while (elapsedTIme < _duration)
@@ -39,10 +39,10 @@ public class ScreenShake : MonoBehaviour
             
             float strength = _strength.Evaluate(elapsedTIme / _duration);
 
-            transform.position = startPosition + Random.insideUnitSphere * strength;
+            transform.localPosition = startPosition + Random.insideUnitSphere * strength;
             yield return null;
         }
 
-        transform.position = startPosition;
+        transform.localPosition = startPosition;
     }
 }

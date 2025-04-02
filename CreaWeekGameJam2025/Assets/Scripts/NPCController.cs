@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.Rendering.Universal.Internal;
+using UnityEngine.VFX;
 
 public class NPCController : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class NPCController : MonoBehaviour
     [SerializeField] private Animator animator;
 
     [SerializeField] public UnityEvent<bool> OnDeath;
+
+    [SerializeField]
+    public VisualEffect _bleeding;
 
     // Bleeding variables
     float minDelay = 1.5f;
@@ -50,10 +54,14 @@ public class NPCController : MonoBehaviour
     void Start()
     {
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
+
+        _bleeding.Stop();
     }
 
     IEnumerator ChangeBleeding(bool v)
     {
+        _bleeding.Play();
+
         float startTime = Time.time;
 
         while(startTime + .5f >= Time.time)
@@ -61,6 +69,8 @@ public class NPCController : MonoBehaviour
             animator.SetFloat("Bleeding", Mathf.Lerp(v ? 0f : 1f, v ? 1f : 0f, (Time.time - startTime) / .5f));
             yield return null;
         }
+
+        
 
     }
 
@@ -72,7 +82,7 @@ public class NPCController : MonoBehaviour
         if(_isBleeding)
         {
             HandleBleeding();
-        }  
+        }
     }
 
     public void Destroy()
@@ -98,6 +108,8 @@ public class NPCController : MonoBehaviour
                 //StateMachine.MoveToState(new DeadNPCState(player.transform.position, this));
             }
         }
+
+        
     }
 
     private void DropBlood()
@@ -171,7 +183,16 @@ public class DeadNPCState : IState
 
         onBloodDropped.Invoke(context.transform.position, _bloodSize);
 
-
+        //screenshake
+        ScreenShake cameraShake = null;
+        if (Camera.main.TryGetComponent<ScreenShake>(out cameraShake))
+        {
+            cameraShake.StartShake(0.2f);
+        }
+        else
+        {
+            Debug.LogError("Please add a ScreenShake Component to the main camera!");
+        }
     }
 
     private void EndRotation()
@@ -394,7 +415,7 @@ public class ChasingState : IState
 
     public void OnEnter()
     {
-
+        
     }
 
     public void OnExit()

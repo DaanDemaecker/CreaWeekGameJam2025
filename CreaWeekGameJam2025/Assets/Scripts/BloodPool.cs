@@ -3,7 +3,10 @@ using UnityEngine;
 
 public class BloodPool : MonoBehaviour
 {
-    private float _growSpeed = 1f;
+    [SerializeField]
+    private bool _ignoreGrow = false;
+    
+    private float _growSpeed = 1.5f;
 
     private Vector3 _baseSize;
     
@@ -11,9 +14,13 @@ public class BloodPool : MonoBehaviour
     {
         _baseSize = this.transform.localScale;
         
-        this.transform.localScale = Vector3.zero;
+        if (!_ignoreGrow)
+        {
+            this.transform.localScale = Vector3.zero;
+
+            StartCoroutine(ScaleToSize());
+        }
         
-        StartCoroutine(ScaleToSize());
     }
 
     private IEnumerator ScaleToSize()
