@@ -25,7 +25,11 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
     [SerializeField]
     private float _rotationSpeed = 20;
 
-    private float _updateAngle = 0f;
+    [SerializeField]
+    private float _lerpMult = 3;
+
+    private float _angle = 0f;
+    private float _angelInput = 0f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -39,9 +43,9 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
     {
         if (_player != null)
         {
-            _cameraOffset = Quaternion.AngleAxis(_updateAngle, Vector3.up) * _cameraOffset;
+            transform.rotation = Quaternion.AngleAxis(_angle += (_angelInput * Time.deltaTime), Vector3.up);
 
-            transform.position = Vector3.Lerp(transform.position, _player.position, Time.deltaTime * 3);
+            transform.position = Vector3.Lerp(transform.position, _player.position, Time.deltaTime * _lerpMult);
 
             //transform.LookAt(new Vector3(_player.position.x, _playerYPos, _player.position.z));
         }
@@ -51,7 +55,7 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
     {
         float movement = context.ReadValue<float>();
 
-        _updateAngle = movement * _rotationSpeed;
+        _angelInput = movement * _rotationSpeed;
     }
 
     public Vector3 RotateToCamera(Vector3 input)

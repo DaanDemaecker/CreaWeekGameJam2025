@@ -192,12 +192,38 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         Vector3 _jumpStart = transform.position;
 
+        bool animate = true;
 
         // actual jumping
         float startTime = Time.time;
-        while(startTime + _jumpDuration + .4f >= Time.time)
+        while(animate && startTime + _jumpDuration + .4f >= Time.time)
         {
             float lerpFactor = (Time.time - startTime) / _jumpDuration;
+
+            if (lerpFactor >= 1)
+            {
+                _isJumping = false;
+                Ray ray = new Ray(transform.position + Vector3.up * 2, Vector3.down);
+                if (!Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask))
+                {
+                    for (int i = 0; i < BodyParts.Count; i++)
+                    {
+                        BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
+                        BodyParts[i].transform.localPosition = Vector3.zero +
+                            (i * Vector3.down * .4f);
+                    }
+
+                    transform.position = _jumpStart;
+                    animate = false;
+
+
+                }
+            }
+
+            if(lerpFactor >= 1.2f)
+            {
+                _isJumping = false;
+            }
 
             for (int i = 0; i < BodyParts.Count; i++)
             {
@@ -220,17 +246,17 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         }
 
-        _isJumping = false;
-        Ray ray = new Ray(transform.position + Vector3.up * 2, Vector3.down);
-        if (!Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask))
+        for (int i = 0; i < BodyParts.Count; i++)
         {
-            transform.position = _jumpStart;
-
+            BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
+            BodyParts[i].transform.localPosition = Vector3.zero +
+                (i * Vector3.down * .4f);
         }
+
         _canJump = true;
 
         startTime = Time.time;
-        while (startTime + .6f >= Time.time)
+        while (!_isJumping && startTime + .6f >= Time.time)
         {
             Vector3 startPos = Vector3.down * .5f;
             Vector3 endPos = Vector3.zero;
@@ -243,17 +269,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             BodyParts[0].transform.localRotation = Quaternion.Lerp(startRot, endRot, (Time.time - startTime) / .6f);
             yield return null;
         }
-        for (int i = 0; i < BodyParts.Count; i++)
-        {
-            BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
-            BodyParts[i].transform.localPosition = Vector3.zero +
-                (i * Vector3.down * .4f);
-        }
 
-        Debug.Log("DONE");
-
-
-        //Stop jumping code
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
