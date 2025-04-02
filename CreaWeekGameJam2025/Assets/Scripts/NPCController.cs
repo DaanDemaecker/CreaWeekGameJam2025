@@ -296,8 +296,6 @@ public class WanderingState : IState
         door = Vector3.zero;
         Collider[] Doors = Physics.OverlapSphere(startPos + dir1 + dir2, dst * 2, 1 << 17);
 
-        Debug.Log("Found " + Doors.Length + " doors");
-
         //if(Doors.Length >= 1)
         if(Doors.Length > 0 && Random.Range(0,1f) > .8f)
         {
