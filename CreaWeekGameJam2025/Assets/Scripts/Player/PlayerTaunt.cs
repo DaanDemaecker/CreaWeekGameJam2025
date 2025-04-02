@@ -40,10 +40,13 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 
         foreach (var npc in _npcsInRange)
         {
-            var direction = transform.position - npc.transform.position;
-            direction.y = 0;
+            if (!npc.IsBleeding)
+            {
+                var direction = transform.position - npc.transform.position;
+                direction.y = 0;
 
-            npc.StateMachine.MoveToState(new ChasingState(transform, npc));
+                npc.StateMachine.MoveToState(new ChasingState(transform, npc));
+            }
         }
 
         if(_npcsInRange.Count == 0)
@@ -68,6 +71,11 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
         for(int i = 0; i < npcs.Length; i++)
         {
             var npc = npcs[i];
+
+            if(npc.IsBleeding)
+            {
+                continue;
+            }    
 
             var distance = Vector3.Distance(transform.position, npc.transform.position);
 
