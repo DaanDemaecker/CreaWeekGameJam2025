@@ -11,6 +11,7 @@ using UnityEngine.Rendering.Universal.Internal;
 public class NPCController : MonoBehaviour
 {
     [HideInInspector] public StateMachine StateMachine;
+    [SerializeField] private Animator animator;
 
     [SerializeField] public UnityEvent<bool> OnDeath;
 
@@ -37,13 +38,30 @@ public class NPCController : MonoBehaviour
     public bool IsBleeding
     {
         get { return _isBleeding; }
-        set { _isBleeding = value; }
+        set {
+            if (_isBleeding == value) return;
+
+            _isBleeding = value;
+            StartCoroutine(ChangeBleeding(value));
+        }
     }
     public delegate void SmallBloodDropped(Vector3 pos, float size);
     public static event SmallBloodDropped onBloodDropped;
     void Start()
     {
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
+    }
+
+    IEnumerator ChangeBleeding(bool v)
+    {
+        float startTime = Time.time;
+
+        while(startTime + .5f >= Time.time)
+        {
+            animator.SetFloat("Bleeding", Mathf.Lerp(v ? 0f : 1f, v ? 1f : 0f, (Time.time - startTime) / .5f));
+        }
+
+        yield return null;
     }
 
     // Update is called once per frame
@@ -53,8 +71,11 @@ public class NPCController : MonoBehaviour
 
         if(_isBleeding)
         {
+            
             HandleBleeding();
         }
+
+       
     }
 
     public void Destroy()
