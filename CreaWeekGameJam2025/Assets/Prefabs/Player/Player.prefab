@@ -83,7 +83,6 @@ GameObject:
   - component: {fileID: 803590192241172065}
   - component: {fileID: 2596084628662236467}
   - component: {fileID: 3364537171306908122}
-  - component: {fileID: 8869405244232008035}
   m_Layer: 3
   m_Name: mesh_demon_body_down
   m_TagString: Untagged
@@ -159,28 +158,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &8869405244232008035
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 991665601237874274}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 7721230323348058476, guid: 4c2ad1ac63f03f94e8be7b4e4f6906a7, type: 3}
 --- !u!1 &2154696694900279737
 GameObject:
   m_ObjectHideFlags: 0
@@ -226,7 +203,6 @@ GameObject:
   - component: {fileID: 967867413622998681}
   - component: {fileID: 2576845190336222091}
   - component: {fileID: 4237827223946741926}
-  - component: {fileID: 5423697432867232939}
   m_Layer: 3
   m_Name: mesh_demon_eyes
   m_TagString: Untagged
@@ -280,7 +256,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: df2e02a3c79ce944389f5b594346032d, type: 2}
+  - {fileID: 2100000, guid: ef52d143f8731244a9c602d5a210fc53, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -302,28 +278,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &5423697432867232939
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2584026589426420907}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 7971448866293387658, guid: 4c2ad1ac63f03f94e8be7b4e4f6906a7, type: 3}
 --- !u!1 &2658066267975722943
 GameObject:
   m_ObjectHideFlags: 0
@@ -382,7 +336,7 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
@@ -470,8 +424,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6776e64e31bd4c4ab333a96dde8f248, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxMoveSpeed: 10
-  _accelerationIncrease: 30
+  _maxMoveSpeed: 6
+  _accelerationIncrease: 60
   _jumpDistance: 2
   _epsilon: 0.1
   _jumpSound: {fileID: 3106645849615422213}
@@ -924,7 +878,6 @@ GameObject:
   - component: {fileID: 6359921050523625976}
   - component: {fileID: 7927122527883349269}
   - component: {fileID: 3613384193838111954}
-  - component: {fileID: 4569566595370116605}
   m_Layer: 3
   m_Name: mesh_demon_body_middle
   m_TagString: Untagged
@@ -1000,28 +953,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &4569566595370116605
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4355742370409763284}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -6386374533009515174, guid: 4c2ad1ac63f03f94e8be7b4e4f6906a7, type: 3}
 --- !u!1 &4731399360956508456
 GameObject:
   m_ObjectHideFlags: 0
@@ -1251,6 +1182,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _tauntCooldown: 5
+  _tauntRange: 15
 --- !u!135 &1040997613645720344
 SphereCollider:
   m_ObjectHideFlags: 0
