@@ -13,13 +13,21 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private Vector3 _moveDirection = Vector3.zero;
     private float _moveMagnitude = 0f;
 
+    private bool _directionHeld = false;
+
     private PlayerShooting _playerShooting = null;
 
-    [SerializeField]
     private PlayerCamera _camera = null;
 
     [SerializeField]
-    private float _moveSpeed = 10.0f;
+    private float _maxMoveSpeed = 10.0f;
+
+    [SerializeField]
+    private AnimationCurve _accelerationCurve;
+
+    private float _accelerationFactor = 0f;
+    private float _accelerationIncrease = 1f;
+
 
     [SerializeField]
     private float _jumpDistance = 5;
@@ -74,9 +82,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _controls.Shoot.SetCallbacks(_playerShooting);
         }
 
+
+        _camera = FindFirstObjectByType<PlayerCamera>();
         if(_camera != null)
         {
             _controls.RotateCamera.SetCallbacks(_camera);
+        
+            if(BodyParts.Count > 0)
+            {
+                _camera.Player = BodyParts[0];
+            }
         }
 
         _controls.Enable();
@@ -95,33 +110,52 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             return;
         }
 
-        var input = context.ReadValue<Vector2>();
-
-        _moveMagnitude = input.magnitude;
-
-        var direction = new Vector3(input.x, 0, input.y);
-
-        if(_camera != null)
+        if (context.performed)
         {
-            direction = _camera.RotateToCamera(direction);
+            _directionHeld = true;
+
+            var input = context.ReadValue<Vector2>();
+
+            _moveMagnitude = input.magnitude;
+
+            var direction = new Vector3(input.x, 0, input.y);
+
+            if (_camera != null)
+            {
+                direction = _camera.RotateToCamera(direction);
+            }
+
+            _moveDirection = direction;
+
+            if (direction != Vector3.zero)
+            {
+                transform.forward = direction;
+            }
         }
-
-        _moveDirection = direction;
-
-        if (direction != Vector3.zero)
+        else if(context.canceled)
         {
-            transform.forward = direction;
+            _directionHeld = false;
         }
-
     }
 
     void FixedUpdate()
     {
+        if(_directionHeld)
+        {
+            _accelerationFactor += Time.fixedDeltaTime * _accelerationIncrease;
+        }
+        else
+        {
+            _accelerationFactor -= Time.fixedDeltaTime * _accelerationIncrease;
+        }
+        _accelerationFactor = Mathf.Clamp(_accelerationFactor, 0.0f, 1.0f);
+
+
         if (_rigidbody != null && !_isJumping)
         {
             _moveDirection.y = 0;
             _moveDirection.Normalize();
-            _moveDirection *= _moveMagnitude * _moveSpeed;
+            _moveDirection *= _moveMagnitude * _maxMoveSpeed * _accelerationCurve.Evaluate(_accelerationFactor);
 
             if(!IsMoveDirectionValid())
             {
@@ -141,6 +175,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
         return result;
     }
+
     [SerializeField]
     float _offsetStep = .55f;
     IEnumerator Jump(Vector3 nextBloodpool)
@@ -149,6 +184,11 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         // start jumping
         _isJumping = true;
         _canJump = false;
+
+        if(_playerShooting)
+        {
+            _playerShooting.ShootInhibitor += 1;
+        }
 
         Vector3 _jumpStart = transform.position;
         Vector3 _jumpEnd = nextBloodpool + (nextBloodpool - _jumpStart).normalized * .2f;
@@ -206,7 +246,24 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         //Stop jumping code
 
-        
+        if (_playerShooting)
+        {
+            _playerShooting.ShootInhibitor -= 1;
+        }
+
+        Ray ray = new Ray(_jumpEnd + Vector3.up * 2, Vector3.down);
+
+        bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
+
+        if (result)
+        {
+            transform.position = _jumpEnd;
+        }
+        else
+        {
+            transform.position = _jumpStart;
+        }
+
 
         _isJumping = false;
         StartCoroutine(JumpCooldown(_jumpCooldown));
@@ -239,6 +296,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         bool floorFound = false;
 
+        bool bloodFound = false;
+
         for (int i = 0; i < (int)(_jumpDistance / _epsilon); i+=2)
         {
             Ray ray = new Ray(transform.position + transform.forward * i * _epsilon*2 + Vector3.up * 2, Vector3.down);
@@ -254,11 +313,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             if(floorFound && result)
             {
                 bloodDistance = i;
+                bloodFound = true;
                 break;
             }
         }
 
         if(!floorFound)
+        {
+            bloodDistance = (int)(_jumpDistance / _epsilon);
+        }
+        else if(!bloodFound)
         {
             bloodDistance = (int)(_jumpDistance / _epsilon);
         }
@@ -276,6 +340,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         _canMove = false;
         _moveDirection = Vector3.zero;
+
+        if(_rigidbody)
+        {
+            _rigidbody.linearVelocity = Vector3.zero;
+        }
+
         yield return new WaitForSeconds(duration);
         _canMove = true;
     }
