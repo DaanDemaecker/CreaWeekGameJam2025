@@ -24,6 +24,10 @@ public class NPCController : MonoBehaviour
     float bleedingTime = 5.0f;
     float bleedingTimer = 0.0f;
     bool isDead = false;
+    public bool IsDead
+    {
+        get { return isDead; }
+    }
 
     public delegate void SmallBloodDropped(Vector3 pos, float size);
     public static event SmallBloodDropped onSmallBloodDropped;
@@ -70,6 +74,7 @@ public class NPCController : MonoBehaviour
             bleedingTimer += Time.deltaTime;
             if(bleedingTimer >= bleedingTime)
             {
+                isDead = true;
                 StateMachine.MoveToState(new DeadNPCState(this));
             }
         }

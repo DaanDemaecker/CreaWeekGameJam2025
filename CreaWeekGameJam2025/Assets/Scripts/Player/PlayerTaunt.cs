@@ -5,12 +5,13 @@ using UnityEngine;
 
 public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 {
-    private List<NPCController> _npcsInRange = new List<NPCController>();
-
     private bool _canTaunt = true;
 
     [SerializeField]
     private float _tauntCooldown = 5.0f;
+
+    [SerializeField]
+    private float _tauntRange = 15.0f;
 
     public void OnTaunt(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
@@ -20,31 +21,21 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        var npc = other.GetComponentInParent<NPCController>();
-
-        if (npc != null)
-        {
-            _npcsInRange.Add(npc);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        var npc = other.GetComponentInParent<NPCController>();
-
-        if (npc != null)
-        {
-            _npcsInRange.Remove(npc);
-        }
-    }
-
     private void Taunt()
     {
-        _npcsInRange.RemoveAll(x => x == null);
+        var npcsInRange = new List<NPCController>();
 
-        foreach (var npc in _npcsInRange)
+        var targets = Physics.OverlapSphere(transform.position, _tauntRange);
+        foreach (var target in targets)
+        {
+            var npc = target.GetComponentInParent<NPCController>();
+            if(npc && !npc.IsBleeding)
+            {
+                npcsInRange.Add(npc);
+            }
+        }
+
+        foreach (var npc in npcsInRange)
         {
             if (!npc.IsBleeding)
             {
@@ -52,7 +43,7 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
             }
         }
 
-        if(_npcsInRange.Count == 0)
+        if(npcsInRange.Count == 0)
         {
             var npc = GetClosestNpc();
             if (npc != null)
