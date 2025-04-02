@@ -16,6 +16,14 @@ public class PlayerBloodTracker : MonoBehaviour
     [SerializeField]
     private bool _countEnemyHit = true;
 
+    public float BloodPercentage
+    {
+        get
+        {
+            return _currBlood/_maxBlood;
+        }
+    }
+
     private void Start()
     {
         _currBlood = _maxBlood;
