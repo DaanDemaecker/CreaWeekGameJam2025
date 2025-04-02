@@ -257,8 +257,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _playerShooting.ShootInhibitor -= 1;
         }
 
+        _canJump = true;
 
-        StartCoroutine(JumpCooldown(_jumpCooldown));
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -340,12 +340,4 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         yield return new WaitForSeconds(duration);
     }
-
-    public IEnumerator JumpCooldown(float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        _canJump = true;
-    }
-
-    
 }
