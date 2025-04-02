@@ -9,6 +9,7 @@ public class SmallProjectile : MonoBehaviour
         if (npc != null)
         {
             npc.IsBleeding = true;
+            Destroy(gameObject);
         }
     }
 }

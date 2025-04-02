@@ -120,6 +120,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9008209706026593365}
   - component: {fileID: 5219024742308374090}
+  - component: {fileID: 5018097793112074291}
   m_Layer: 0
   m_Name: NPC CAPTAIN
   m_TagString: Untagged
@@ -159,6 +160,18 @@ MonoBehaviour:
   OnDeath:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5018097793112074291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2480893771629399371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb6066270ec787c4a942f76186308bda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3142087464697609903
 GameObject:
   m_ObjectHideFlags: 0
