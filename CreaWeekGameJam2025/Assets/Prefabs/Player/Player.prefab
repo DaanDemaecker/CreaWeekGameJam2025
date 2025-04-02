@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 803590192241172065}
   - component: {fileID: 2596084628662236467}
   - component: {fileID: 3364537171306908122}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mesh_demon_body_down
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 967867413622998681}
   - component: {fileID: 2576845190336222091}
   - component: {fileID: 4237827223946741926}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mesh_demon_eyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -353,30 +353,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxMoveSpeed: 10
-  _accelerationCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  _accelerationIncrease: 30
   _jumpDistance: 2
   _epsilon: 0.1
   _jumpSound: {fileID: 3106645849615422213}
@@ -844,7 +821,7 @@ GameObject:
   - component: {fileID: 1373667406632671825}
   - component: {fileID: 5531712136281943526}
   - component: {fileID: 2357191757700179711}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: 
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -931,7 +908,7 @@ GameObject:
   - component: {fileID: 6359921050523625976}
   - component: {fileID: 7927122527883349269}
   - component: {fileID: 3613384193838111954}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mesh_demon_body_middle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1049,7 +1026,7 @@ GameObject:
   - component: {fileID: 7074063476276537871}
   - component: {fileID: 1220812035407551625}
   - component: {fileID: 8766760977634541761}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mesh_demon_head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
