@@ -8,6 +8,7 @@
     border-right-color: rgba(18, 0, 22, 0.46);
     border-top-color: rgba(18, 0, 22, 0.46);
     border-bottom-color: rgba(18, 0, 22, 0.46);
+    background-image: none;
 }
 
 .frame {
