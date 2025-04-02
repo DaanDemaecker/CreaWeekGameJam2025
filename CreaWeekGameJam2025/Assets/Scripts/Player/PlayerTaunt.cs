@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -6,9 +7,14 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 {
     private List<NPCController> _npcsInRange = new List<NPCController>();
 
+    private bool _canTaunt = true;
+
+    [SerializeField]
+    private float _tauntCooldown = 5.0f;
+
     public void OnTaunt(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-       if(context.performed)
+       if(context.performed && _canTaunt)
         {
             Taunt();
         }
@@ -58,6 +64,8 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 
     NPCController GetClosestNpc()
     {
+        StartCoroutine(TauntCooldown(_tauntCooldown));
+
         var npcs = FindObjectsByType<NPCController>(FindObjectsSortMode.None);
 
         if(npcs.Length <0) return null;
@@ -84,5 +92,12 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
         }
 
         return npcs[closestNpc];
+    }
+
+    private IEnumerator TauntCooldown(float duration)
+    {
+        _canTaunt = false;
+        yield return new WaitForSeconds(duration);
+        _canTaunt = true;
     }
 }
