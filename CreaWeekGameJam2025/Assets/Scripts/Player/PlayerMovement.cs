@@ -230,7 +230,19 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                         BodyParts[i].transform.localPosition = Vector3.zero +
                             (i * Vector3.down * .4f);
                     }
+
+                    //Screenshake and VFX
+                    ScreenShake cameraShake = null;
+                    if (Camera.main.TryGetComponent<ScreenShake>(out cameraShake))
+                    {
+                        cameraShake.StartShake(0.2f);
+                    }
+                    else
+                    {
+                        Debug.LogError("Please add a ScreenShake Component to the main camera!");
+                    }
                     _death.Play();
+
                     yield return new WaitForEndOfFrame();
                     transform.position = _jumpStart;
                     animate = false;
