@@ -15,14 +15,12 @@ public class BloodSplatterManager : MonoBehaviour
 
     private void OnEnable()
     {
-        BleedingState.onSmallBloodDropped += SpawnBloodSplatter;
-        DyingState.onBigBloodDropped += SpawnBloodSplatter;
+        NPCController.onSmallBloodDropped += SpawnBloodSplatter;
     }
 
     private void OnDisable()
     {
-        BleedingState.onSmallBloodDropped -= SpawnBloodSplatter;
-        DyingState.onBigBloodDropped -= SpawnBloodSplatter;
+        NPCController.onSmallBloodDropped -= SpawnBloodSplatter;
     }
 
     private void Update()
