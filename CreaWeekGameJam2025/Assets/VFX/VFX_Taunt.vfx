@@ -202,7 +202,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614756}
   - {fileID: 8926484042661614775}
   dataType: 0
-  capacity: 4096
+  capacity: 512
   stripCapacity: 1
   particlePerStripCount: 32
   needsComputeBounds: 0
@@ -474,7 +474,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"obj":{"fileID":10307,"guid":"0000000000000000f000000000000000","type":0}}'
+      m_SerializableObject: '{"obj":{"fileID":2800000,"guid":"07882399585d0374cb3c3a2376ebc1c8","type":3}}'
     m_Space: -1
   m_Property:
     name: mainTexture
@@ -2817,7 +2817,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 4096
+      m_SerializableObject: 512
     m_Space: -1
   m_Property:
     name: Count
@@ -3721,7 +3721,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615095}
   - {fileID: 8926484042661615107}
   dataType: 0
-  capacity: 4096
+  capacity: 256
   stripCapacity: 1
   particlePerStripCount: 32
   needsComputeBounds: 0
@@ -5453,7 +5453,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"obj":{"fileID":10307,"guid":"0000000000000000f000000000000000","type":0}}'
+      m_SerializableObject: '{"obj":{"fileID":2800000,"guid":"07882399585d0374cb3c3a2376ebc1c8","type":3}}'
     m_Space: -1
   m_Property:
     name: mainTexture
@@ -6206,7 +6206,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 4096
+      m_SerializableObject: 256
     m_Space: -1
   m_Property:
     name: Count
@@ -6785,7 +6785,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615190}
   - {fileID: 8926484042661615202}
   dataType: 0
-  capacity: 4096
+  capacity: 128
   stripCapacity: 1
   particlePerStripCount: 32
   needsComputeBounds: 0
@@ -8517,7 +8517,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"obj":{"fileID":10307,"guid":"0000000000000000f000000000000000","type":0}}'
+      m_SerializableObject: '{"obj":{"fileID":2800000,"guid":"07882399585d0374cb3c3a2376ebc1c8","type":3}}'
     m_Space: -1
   m_Property:
     name: mainTexture
@@ -9270,7 +9270,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 4096
+      m_SerializableObject: 128
     m_Space: -1
   m_Property:
     name: Count
