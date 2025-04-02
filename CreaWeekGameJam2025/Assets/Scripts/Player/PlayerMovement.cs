@@ -178,18 +178,35 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             }
             yield return null;
         }
+        transform.position = _jumpEnd;
+        
+        startTime = Time.time;
+        while (startTime + .6f >= Time.time)
+        {
+            Vector3 startPos = Vector3.down * .5f;
+            Vector3 endPos = Vector3.zero;
+
+            BodyParts[0].transform.localPosition = Vector3.Lerp(startPos, endPos, (Time.time - startTime) / .6f);
+
+            Quaternion startRot = Quaternion.Euler(-90, 0, 0);
+            Quaternion endRot = Quaternion.Euler(0, 0, 0);
+
+            BodyParts[0].transform.localRotation = Quaternion.Lerp(startRot, endRot, (Time.time - startTime) / .6f);
+            yield return null;
+        }
         for (int i = 0; i < BodyParts.Count; i++)
         {
             BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
-            BodyParts[i].transform.localPosition = Vector3.zero + 
-                (i * Vector3.down * _offsetStep);
+            BodyParts[i].transform.localPosition = Vector3.zero +
+                (i * Vector3.down * .4f);
         }
+
         Debug.Log("DONE");
 
 
         //Stop jumping code
 
-        transform.position = _jumpEnd;
+        
 
         _isJumping = false;
         StartCoroutine(JumpCooldown(_jumpCooldown));
