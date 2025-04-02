@@ -24,9 +24,12 @@ public class NPCController : MonoBehaviour
     float bleedingTime = 5.0f;
     float bleedingTimer = 0.0f;
     bool isDead = false;
+    public bool IsDead
+    {
+        get { return isDead; }
+    }
 
-    public delegate void SmallBloodDropped(Vector3 pos, float size);
-    public static event SmallBloodDropped onSmallBloodDropped;
+    
 
     private bool _isBleeding = false;
     public bool IsBleeding
@@ -34,7 +37,8 @@ public class NPCController : MonoBehaviour
         get { return _isBleeding; }
         set { _isBleeding = value; }
     }
-
+    public delegate void SmallBloodDropped(Vector3 pos, float size);
+    public static event SmallBloodDropped onBloodDropped;
     void Start()
     {
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
@@ -70,6 +74,7 @@ public class NPCController : MonoBehaviour
             bleedingTimer += Time.deltaTime;
             if(bleedingTimer >= bleedingTime)
             {
+                isDead = true;
                 StateMachine.MoveToState(new DeadNPCState(this));
             }
         }
@@ -77,7 +82,7 @@ public class NPCController : MonoBehaviour
 
     private void DropBlood()
     {
-        onSmallBloodDropped.Invoke(transform.position, bloodSize);
+        onBloodDropped.Invoke(transform.position, bloodSize);
 
         bloodTimer = 0;
         bloodCooldown = Random.Range(minDelay, maxDelay);
@@ -116,6 +121,11 @@ public interface IState
 }
 public class DeadNPCState : IState
 {
+    float bloodSize = 3.0f;
+
+    public delegate void SmallBloodDropped(Vector3 pos, float size);
+    public static event SmallBloodDropped onBloodDropped;
+
     NPCController context;
     public DeadNPCState(NPCController ctx)
     {
@@ -125,6 +135,8 @@ public class DeadNPCState : IState
     {
         context.OnDeath.Invoke();
         context.transform.localScale = new Vector3(1, .1f, 1);
+
+        onBloodDropped.Invoke(context.transform.position, bloodSize);
     }
 
     public void OnExit()
@@ -290,8 +302,6 @@ public class WanderingState : IState
     {
         door = Vector3.zero;
         Collider[] Doors = Physics.OverlapSphere(startPos + dir1 + dir2, dst * 2, 1 << 17);
-
-        Debug.Log("Found " + Doors.Length + " doors");
 
         //if(Doors.Length >= 1)
         if(Doors.Length > 0 && Random.Range(0,1f) > .8f)

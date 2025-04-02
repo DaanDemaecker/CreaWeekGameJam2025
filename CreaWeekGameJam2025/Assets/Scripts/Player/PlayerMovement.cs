@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -190,11 +189,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _canJump = false;
         //_canMove = false;
 
-        //if (_playerShooting)
-        //{
-        //    _playerShooting.ShootInhibitor += 1;
-        //}
-
         Vector3 _jumpStart = transform.position;
 
         bool animate = true;
@@ -274,7 +268,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             BodyParts[0].transform.localRotation = Quaternion.Lerp(startRot, endRot, (Time.time - startTime) / .6f);
             yield return null;
         }
-
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)

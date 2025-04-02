@@ -22,9 +22,7 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
     private float _maxDistance = 10.0f;
 
     [SerializeField]
-    private NPC _currentTarget = null;
-
-    private List<NPC> _possibleTargets = new List<NPC>();
+    private NPCController _currentTarget = null;
 
     public void OnShootSmall(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
@@ -76,16 +74,29 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
         }
     }
 
-    private NPC FindTarget(float maxAngle, float maxDistance)
+    private NPCController FindTarget(float maxAngle, float maxDistance)
     {
-        _possibleTargets.RemoveAll(x => x == null);
+        var possibleTargets = new List<NPCController>();
 
-        NPC  targetGO = null;
+        var targets = Physics.OverlapSphere(transform.position, _maxDistance);
+        foreach (var target in targets)
+        {
+            var npc = target.GetComponentInParent<NPCController>();
+            if (npc)
+            {
+                if (!npc.IsDead)
+                {
+                    possibleTargets.Add(npc);
+                }
+            }
+        }
+
+        NPCController targetGO = null;
 
         float minDotProduct = Mathf.Cos(maxAngle * Mathf.Deg2Rad);
         float targetDistanceSqrd = maxDistance * maxDistance;
 
-        foreach (NPC go in _possibleTargets)
+        foreach (NPCController go in possibleTargets)
         {
             Vector3 relativePosition = go.transform.position - transform.position;
 
@@ -98,25 +109,5 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
             }
         }
         return targetGO;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        var npc = other.GetComponentInParent<NPC>();
-
-        if (npc != null)
-        {
-            _possibleTargets.Add(npc);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        var npc = other.GetComponentInParent<NPC>();
-
-        if (npc != null)
-        {
-            _possibleTargets.Remove(npc);
-        }
     }
 }
