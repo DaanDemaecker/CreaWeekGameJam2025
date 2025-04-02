@@ -24,7 +24,7 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: Blend
     m_Mirror: 0
-  m_BlendParameter: Bleeding 0
+  m_BlendParameter: Bleeding
   m_BlendParameterY: Blend
   m_MinThreshold: 0
   m_MaxThreshold: 1
@@ -40,7 +40,7 @@ AnimatorController:
   m_Name: Pepper
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: Bleeding 0
+  - m_Name: Bleeding
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -136,7 +136,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 1a55b233a276e124cac68598bd390281, type: 2}
+  m_Motion: {fileID: 7400000, guid: edef68b135f3d614d8c1f194e0e69862, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
