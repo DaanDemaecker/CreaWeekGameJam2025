@@ -257,8 +257,8 @@ public class BleedingState : IState
     public delegate void SmallBloodDropped(Vector3 pos, float size);
     public static event SmallBloodDropped onSmallBloodDropped;
 
-    float minDelay = 0.8f;
-    float maxDelay = 1.5f;
+    float minDelay = 1.5f;
+    float maxDelay = 2.0f;
     float bloodSize = 2.0f;
     float bloodCooldown = 0;
     float bloodTimer = 0;

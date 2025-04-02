@@ -13,12 +13,18 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private Vector3 _moveDirection = Vector3.zero;
     private float _moveMagnitude = 0f;
 
+    private bool _directionHeld = false;
+
     private PlayerShooting _playerShooting = null;
 
     private PlayerCamera _camera = null;
 
     [SerializeField]
-    private float _moveSpeed = 10.0f;
+    private float _maxMoveSpeed = 10.0f;
+
+    [SerializeField]
+    private float _accelerationIncrease = 30f;
+
 
     [SerializeField]
     private float _jumpDistance = 5;
@@ -81,7 +87,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         
             if(BodyParts.Count > 0)
             {
-                _camera.Player = BodyParts[0];
+                _camera.Player = transform;
             }
         }
 
@@ -93,60 +99,81 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         _bloodSplash.Stop();
     }
-
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if(!_canMove)
+        if (context.performed)
         {
-            return;
+            _directionHeld = true;
+
+            var input = context.ReadValue<Vector2>();
+
+            _moveMagnitude = input.magnitude;
+
+            var direction = new Vector3(input.x, 0, input.y);
+
+            if (_camera != null)
+            {
+                direction = _camera.RotateToCamera(direction);
+            }
+
+            _moveDirection = direction;
+
+            if (direction != Vector3.zero)
+            {
+                transform.forward = direction;
+            }
         }
-
-        var input = context.ReadValue<Vector2>();
-
-        _moveMagnitude = input.magnitude;
-
-        var direction = new Vector3(input.x, 0, input.y);
-
-        if(_camera != null)
+        else if(context.canceled)
         {
-            direction = _camera.RotateToCamera(direction);
+            _directionHeld = false;
         }
-
-        _moveDirection = direction;
-
-        if (direction != Vector3.zero)
-        {
-            transform.forward = direction;
-        }
-
     }
 
     void FixedUpdate()
     {
-        if (_rigidbody != null && !_isJumping)
+        if (_rigidbody != null)
         {
-            _moveDirection.y = 0;
-            _moveDirection.Normalize();
-            _moveDirection *= _moveMagnitude * _moveSpeed;
+            var velocity = _rigidbody.linearVelocity;
 
-            if(!IsMoveDirectionValid())
+            if (_directionHeld)
             {
-                _moveDirection.x = 0;
-                _moveDirection.z = 0;
+                velocity += _moveDirection * Time.fixedDeltaTime * _accelerationIncrease;
+
+                var magnitude = velocity.magnitude;
+
+                magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
+
+                velocity = velocity.normalized * magnitude;
+            }
+            else
+            {
+                var magnitude = velocity.magnitude;
+
+                magnitude -= _accelerationIncrease * Time.fixedDeltaTime;
+
+                magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
+
+                velocity = velocity.normalized * magnitude;
             }
 
-            _moveDirection.y = _rigidbody.linearVelocity.y;
-            _rigidbody.linearVelocity = _moveDirection;
+            if(!_isJumping && !IsMoveDirectionValid(velocity))
+            {
+               velocity = Vector3.zero;
+            }
+
+            _rigidbody.linearVelocity = velocity;
+
         }
     }
 
-    bool IsMoveDirectionValid()
+    bool IsMoveDirectionValid(Vector3 direction)
     {
-        Ray ray = new Ray(transform.position + _moveDirection * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
+        Ray ray = new Ray(transform.position + direction * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
         return result;
     }
+
     [SerializeField]
     float _offsetStep = .55f;
     IEnumerator Jump(Vector3 nextBloodpool)
@@ -155,14 +182,14 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         // start jumping
         _isJumping = true;
         _canJump = false;
+        //_canMove = false;
 
-        if(_playerShooting)
+        if (_playerShooting)
         {
             _playerShooting.ShootInhibitor += 1;
         }
 
         Vector3 _jumpStart = transform.position;
-        Vector3 _jumpEnd = nextBloodpool + (nextBloodpool - _jumpStart).normalized * .2f;
 
 
         // actual jumping
@@ -175,26 +202,52 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             {
                 float offset = i * _offsetStep;
                 
-                Vector3 newPos = Vector3.Lerp(_jumpStart,_jumpEnd, lerpFactor - offset);
+                Vector3 newPos = Vector3.Lerp(_jumpStart,transform.position, lerpFactor - offset);
                 float jumpHeight = _jumpCurve.Evaluate(lerpFactor - offset) * _jumpHeight;
                 newPos.y = _jumpStart.y + jumpHeight;
 
+                float velOffset = _rigidbody.linearVelocity.magnitude * .03f * i;
+                BodyParts[i].transform.localPosition = new Vector3(0,newPos.y,  -velOffset);
 
                 Vector3 targetDir = new Vector3(0, _jumpCurve.Evaluate(lerpFactor - offset), lerpFactor - offset) -
                     new Vector3(0, _jumpCurve.Evaluate(lerpFactor - .1f - offset), lerpFactor - .1f - offset);
                 Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
                 BodyParts[i].transform.localRotation = targetRotation;
 
-                BodyParts[i].transform.position = newPos;
             }
+            yield return null;
+        }
+
+        _isJumping = false;
+        Ray ray = new Ray(transform.position + Vector3.up * 2, Vector3.down);
+        if (!Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask))
+        {
+            transform.position = _jumpStart;
+
+        }
+        //_canMove = true;
+
+        startTime = Time.time;
+        while (startTime + .6f >= Time.time)
+        {
+            Vector3 startPos = Vector3.down * .5f;
+            Vector3 endPos = Vector3.zero;
+
+            BodyParts[0].transform.localPosition = Vector3.Lerp(startPos, endPos, (Time.time - startTime) / .6f);
+
+            Quaternion startRot = Quaternion.Euler(-90, 0, 0);
+            Quaternion endRot = Quaternion.Euler(0, 0, 0);
+
+            BodyParts[0].transform.localRotation = Quaternion.Lerp(startRot, endRot, (Time.time - startTime) / .6f);
             yield return null;
         }
         for (int i = 0; i < BodyParts.Count; i++)
         {
             BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
-            BodyParts[i].transform.localPosition = Vector3.zero + 
-                (i * Vector3.down * _offsetStep);
+            BodyParts[i].transform.localPosition = Vector3.zero +
+                (i * Vector3.down * .4f);
         }
+
         Debug.Log("DONE");
 
 
@@ -205,10 +258,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _playerShooting.ShootInhibitor -= 1;
         }
 
-        transform.position = _jumpEnd;
+        _canJump = true;
 
-        _isJumping = false;
-        StartCoroutine(JumpCooldown(_jumpCooldown));
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -223,7 +274,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         if (nextBloodPool != Vector3.zero)
         {
-            StartCoroutine(DisableMovement(_jumpDuration));
+            //StartCoroutine(DisableMovement(_jumpDuration));
             StartCoroutine(Jump(nextBloodPool));
             
         }
@@ -237,6 +288,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         int bloodDistance = 0;
 
         bool floorFound = false;
+
+        bool bloodFound = false;
 
         for (int i = 0; i < (int)(_jumpDistance / _epsilon); i+=2)
         {
@@ -253,11 +306,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             if(floorFound && result)
             {
                 bloodDistance = i;
+                bloodFound = true;
                 break;
             }
         }
 
         if(!floorFound)
+        {
+            bloodDistance = (int)(_jumpDistance / _epsilon);
+        }
+        else if(!bloodFound)
         {
             bloodDistance = (int)(_jumpDistance / _epsilon);
         }
@@ -273,7 +331,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     public IEnumerator DisableMovement(float duration)
     {
-        _canMove = false;
+        
         _moveDirection = Vector3.zero;
 
         if(_rigidbody)
@@ -282,14 +340,11 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         }
 
         yield return new WaitForSeconds(duration);
-        _canMove = true;
     }
 
-    public IEnumerator JumpCooldown(float duration)
+    private void OnDrawGizmos()
     {
-        yield return new WaitForSeconds(duration);
-        _canJump = true;
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(transform.position, .3f);
     }
-
-    
 }
