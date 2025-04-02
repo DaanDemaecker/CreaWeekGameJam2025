@@ -10,7 +10,7 @@ public class RandomScaleEditor : MonoBehaviour
         {
             Undo.RecordObject(obj.transform, "Random Scale");
 
-            float randomScale = Random.Range(0.15f, 0.27f);
+            float randomScale = Random.Range(8f, 12f);
             obj.transform.localScale = new Vector3(randomScale, randomScale, randomScale);
         }
     }
