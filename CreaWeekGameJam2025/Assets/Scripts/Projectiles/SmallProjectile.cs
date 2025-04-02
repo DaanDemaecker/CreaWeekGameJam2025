@@ -6,7 +6,7 @@ public class SmallProjectile : MonoBehaviour
     {
         var npc = other.GetComponentInParent<NPCController>();
 
-        if (npc != null)
+        if (npc != null && !npc.IsDead)
         {
             npc.IsBleeding = true;
 

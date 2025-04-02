@@ -29,7 +29,7 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
         foreach (var target in targets)
         {
             var npc = target.GetComponentInParent<NPCController>();
-            if(npc && !npc.IsBleeding && !npc.IsDead)
+            if(npc && !(npc.IsBleeding || npc.IsDead))
             {
                 npcsInRange.Add(npc);
             }
