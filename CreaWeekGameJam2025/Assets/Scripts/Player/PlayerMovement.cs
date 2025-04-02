@@ -87,7 +87,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         
             if(BodyParts.Count > 0)
             {
-                _camera.Player = BodyParts[0];
+                _camera.Player = transform;
             }
         }
 
@@ -133,8 +133,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     {
         if (_rigidbody != null)
         {
-            if (!_isJumping)
-            {
+            //if (!_isJumping)
+            //{
                 var velocity = _rigidbody.linearVelocity;
 
                 if (_directionHeld)
@@ -160,7 +160,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
                 _rigidbody.linearVelocity = velocity;
             }
-        }
+        //}
     }
 
     bool IsMoveDirectionValid(Vector3 direction)
@@ -203,7 +203,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 float jumpHeight = _jumpCurve.Evaluate(lerpFactor - offset) * _jumpHeight;
                 newPos.y = _jumpStart.y + jumpHeight;
 
-                BodyParts[i].transform.position = newPos;
+                float velOffset = _rigidbody.linearVelocity.magnitude * .03f * i;
+                BodyParts[i].transform.localPosition = new Vector3(0,newPos.y,  -velOffset);
 
                 Vector3 targetDir = new Vector3(0, _jumpCurve.Evaluate(lerpFactor - offset), lerpFactor - offset) -
                     new Vector3(0, _jumpCurve.Evaluate(lerpFactor - .1f - offset), lerpFactor - .1f - offset);
@@ -270,7 +271,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         if (nextBloodPool != Vector3.zero)
         {
-            StartCoroutine(DisableMovement(_jumpDuration));
+            //StartCoroutine(DisableMovement(_jumpDuration));
             StartCoroutine(Jump(nextBloodPool));
             
         }
@@ -344,5 +345,10 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _canJump = true;
     }
 
-    
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(transform.position, .3f);
+    }
+
 }
