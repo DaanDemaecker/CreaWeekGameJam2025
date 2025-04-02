@@ -36,14 +36,14 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 
     private void Taunt()
     {
-        RemoveDeadNpcs();
+        _npcsInRange.RemoveAll(x => x == null);
 
         foreach (var npc in _npcsInRange)
         {
-            var direction = transform.position - npc.transform.position;
-            direction.y = 0;
-
-            npc.StateMachine.MoveToState(new ChasingState(transform, npc));
+            if (!npc.IsBleeding)
+            {
+                npc.StateMachine.MoveToState(new ChasingState(transform, npc));
+            }
         }
 
         if(_npcsInRange.Count == 0)
@@ -69,6 +69,11 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
         {
             var npc = npcs[i];
 
+            if(npc.IsBleeding)
+            {
+                continue;
+            }    
+
             var distance = Vector3.Distance(transform.position, npc.transform.position);
 
             if(distance < closestDistance)
@@ -80,10 +85,4 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 
         return npcs[closestNpc];
     }
-
-    private void RemoveDeadNpcs()
-    {
-        _npcsInRange.RemoveAll(x => x == null);
-    }
-
 }
