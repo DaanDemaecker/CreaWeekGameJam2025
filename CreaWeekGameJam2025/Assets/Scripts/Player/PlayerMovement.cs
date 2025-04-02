@@ -175,6 +175,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
         return result;
     }
+
     [SerializeField]
     float _offsetStep = .55f;
     IEnumerator Jump(Vector3 nextBloodpool)
@@ -233,7 +234,19 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _playerShooting.ShootInhibitor -= 1;
         }
 
-        transform.position = _jumpEnd;
+        Ray ray = new Ray(_jumpEnd + Vector3.up * 2, Vector3.down);
+
+        bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
+
+        if (result)
+        {
+            transform.position = _jumpEnd;
+        }
+        else
+        {
+            transform.position = _jumpStart;
+        }
+
 
         _isJumping = false;
         StartCoroutine(JumpCooldown(_jumpCooldown));
@@ -266,6 +279,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         bool floorFound = false;
 
+        bool bloodFound = false;
+
         for (int i = 0; i < (int)(_jumpDistance / _epsilon); i+=2)
         {
             Ray ray = new Ray(transform.position + transform.forward * i * _epsilon*2 + Vector3.up * 2, Vector3.down);
@@ -281,11 +296,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             if(floorFound && result)
             {
                 bloodDistance = i;
+                bloodFound = true;
                 break;
             }
         }
 
         if(!floorFound)
+        {
+            bloodDistance = (int)(_jumpDistance / _epsilon);
+        }
+        else if(!bloodFound)
         {
             bloodDistance = (int)(_jumpDistance / _epsilon);
         }
