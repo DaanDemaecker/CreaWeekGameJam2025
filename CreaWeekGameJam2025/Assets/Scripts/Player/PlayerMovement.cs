@@ -218,7 +218,19 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             }
             yield return null;
         }
-        transform.position = _jumpEnd;
+
+        Ray ray = new Ray(_jumpEnd + Vector3.up * 2, Vector3.down);
+
+        bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
+
+        if (result)
+        {
+            transform.position = _jumpEnd;
+        }
+        else
+        {
+            transform.position = _jumpStart;
+        }
         
         startTime = Time.time;
         while (startTime + .6f >= Time.time)
@@ -249,19 +261,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         if (_playerShooting)
         {
             _playerShooting.ShootInhibitor -= 1;
-        }
-
-        Ray ray = new Ray(_jumpEnd + Vector3.up * 2, Vector3.down);
-
-        bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
-
-        if (result)
-        {
-            transform.position = _jumpEnd;
-        }
-        else
-        {
-            transform.position = _jumpStart;
         }
 
 
