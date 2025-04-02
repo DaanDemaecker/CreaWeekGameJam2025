@@ -409,4 +409,45 @@ public class DyingState : IState
             DropBlood();
         }
     }
+
+    public class ChasingState : IState
+    {
+
+        NPCController _context;
+
+        Transform _player;
+
+        float _chasingDuration = 2.5f;
+        float _timer = 0;
+        float _speed = 2.0f;
+
+        public ChasingState(Transform player, NPCController ctx)
+        {
+            _context = ctx;
+            _player = player;
+        }
+
+        public void OnEnter()
+        {
+            
+        }
+
+        public void OnExit()
+        {
+        }
+        public void OnUpdate()
+        {
+            var direction = _player.transform.position - _context.transform.position;
+            direction.y = 0;
+
+            _context.transform.position = _context.transform.position + direction.normalized * _speed * Time.deltaTime;
+
+            _timer += Time.deltaTime;
+
+            if (_timer > _chasingDuration)
+            {
+                _context.StateMachine.MoveToState(new WanderingState(Vector3.zero, _context));
+            }
+        }
+    }
 }

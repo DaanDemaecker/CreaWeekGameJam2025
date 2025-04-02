@@ -286,6 +286,45 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Taunt",
+            "id": "3a64be98-388f-4c18-a33f-a38c6b0553a5",
+            "actions": [
+                {
+                    "name": "Taunt",
+                    "type": "Button",
+                    "id": "15a1ed7f-a46d-4929-b2ca-5a106d14bccc",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "9dae7648-7106-4c91-bb12-539f11478d7a",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Taunt",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "47cbac3b-56c4-460e-b2e9-36db3597fc83",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Taunt",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
