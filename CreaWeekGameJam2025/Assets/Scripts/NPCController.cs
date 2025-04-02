@@ -11,7 +11,7 @@ public class NPCController : MonoBehaviour
 {
     [HideInInspector] public StateMachine StateMachine;
 
-    [SerializeField] public UnityEvent OnDeath;
+    [SerializeField] public UnityEvent<bool> OnDeath;
 
     // Bleeding variables
     float minDelay = 1.5f;
@@ -123,7 +123,7 @@ public class DeadNPCState : IState
     }
     public void OnEnter()
     {
-        context.OnDeath.Invoke();
+        context.OnDeath.Invoke(true);
         context.transform.localScale = new Vector3(1, .1f, 1);
     }
 
