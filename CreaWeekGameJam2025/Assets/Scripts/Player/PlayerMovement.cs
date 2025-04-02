@@ -222,6 +222,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
             }
             yield return null;
+
         }
 
         _isJumping = false;
@@ -231,7 +232,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             transform.position = _jumpStart;
 
         }
-        //_canMove = true;
+        _canJump = true;
 
         startTime = Time.time;
         while (startTime + .6f >= Time.time)
@@ -264,7 +265,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             _playerShooting.ShootInhibitor -= 1;
         }
 
-        _canJump = true;
 
     }
 
@@ -346,11 +346,5 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         }
 
         yield return new WaitForSeconds(duration);
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(transform.position, .3f);
     }
 }

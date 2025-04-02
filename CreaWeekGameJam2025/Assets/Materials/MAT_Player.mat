@@ -105,7 +105,7 @@ Material:
     - _ClearCoatSmoothness: 0
     - _Cull: 2
     - _Cutoff: 0.5
-    - _DeepShadowStep: -0.16
+    - _DeepShadowStep: -0.012
     - _DeepShadowStrength: 0.09
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
@@ -115,7 +115,7 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _HighlightStep: 0.572
+    - _HighlightStep: 0.812
     - _HighlightStrength: 0.118
     - _Metallic: 0
     - _OcclusionStrength: 1
@@ -124,8 +124,8 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Rotation: 0
-    - _ShadowStep: -0.19
-    - _ShadowStrength: 0.94
+    - _ShadowStep: 0.063
+    - _ShadowStrength: 0.838
     - _Smoothness: 0.191
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
