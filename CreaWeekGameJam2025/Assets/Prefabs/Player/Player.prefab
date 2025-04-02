@@ -222,6 +222,7 @@ GameObject:
   - component: {fileID: 4437205709745159250}
   - component: {fileID: 2179102078986679928}
   - component: {fileID: 5104597942191021135}
+  - component: {fileID: 6062299754290420823}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -424,6 +425,20 @@ MonoBehaviour:
   _maxAngle: 45
   _maxDistance: 15
   _currentTarget: {fileID: 0}
+--- !u!114 &6062299754290420823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2658066267975722943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd3c8277b49f0604c9381fc572de9079, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _meleeCooldown: 5
+  _meleeRange: 5
 --- !u!1 &2664487318013015600
 GameObject:
   m_ObjectHideFlags: 0
