@@ -162,9 +162,10 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 velocity = velocity.normalized * magnitude;
             }
 
-            if(!_isJumping && !IsMoveDirectionValid(velocity))
+            if(!_isJumping && !IsMoveDirectionValid(_moveDirection, out Vector3 newvel))
             {
-               velocity = Vector3.zero;
+               velocity = newvel;
+                
             }
 
             _rigidbody.linearVelocity = velocity;
@@ -181,10 +182,23 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
 
     }
-
-    bool IsMoveDirectionValid(Vector3 direction)
+    [SerializeField] float dst;
+    bool IsMoveDirectionValid(Vector3 direction, out Vector3 newDirection)
     {
+        newDirection = Vector3.zero;    
         Ray ray = new Ray(transform.position + direction * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
+
+        if (Physics.Raycast(transform.position, direction, dst, 1 << 16))
+            return false;
+        //if(Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask)){
+
+        //    Debug.Log("Reached EDGE");
+        //    if (Physics.Raycast(transform.position + (direction * 2), -direction, out RaycastHit hit, dst, _bloodLayerMask))
+        //    {
+        //        Debug.Log("Hitting Wall");
+        //    }
+        //}
+
 
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
         return result;
