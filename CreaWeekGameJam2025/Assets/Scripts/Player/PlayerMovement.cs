@@ -13,12 +13,21 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private Vector3 _moveDirection = Vector3.zero;
     private float _moveMagnitude = 0f;
 
+    private bool _directionHeld = false;
+
     private PlayerShooting _playerShooting = null;
 
     private PlayerCamera _camera = null;
 
     [SerializeField]
-    private float _moveSpeed = 10.0f;
+    private float _maxMoveSpeed = 10.0f;
+
+    [SerializeField]
+    private AnimationCurve _accelerationCurve;
+
+    private float _accelerationFactor = 0f;
+    private float _accelerationIncrease = 1f;
+
 
     [SerializeField]
     private float _jumpDistance = 5;
@@ -101,33 +110,52 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             return;
         }
 
-        var input = context.ReadValue<Vector2>();
-
-        _moveMagnitude = input.magnitude;
-
-        var direction = new Vector3(input.x, 0, input.y);
-
-        if(_camera != null)
+        if (context.performed)
         {
-            direction = _camera.RotateToCamera(direction);
+            _directionHeld = true;
+
+            var input = context.ReadValue<Vector2>();
+
+            _moveMagnitude = input.magnitude;
+
+            var direction = new Vector3(input.x, 0, input.y);
+
+            if (_camera != null)
+            {
+                direction = _camera.RotateToCamera(direction);
+            }
+
+            _moveDirection = direction;
+
+            if (direction != Vector3.zero)
+            {
+                transform.forward = direction;
+            }
         }
-
-        _moveDirection = direction;
-
-        if (direction != Vector3.zero)
+        else if(context.canceled)
         {
-            transform.forward = direction;
+            _directionHeld = false;
         }
-
     }
 
     void FixedUpdate()
     {
+        if(_directionHeld)
+        {
+            _accelerationFactor += Time.fixedDeltaTime * _accelerationIncrease;
+        }
+        else
+        {
+            _accelerationFactor -= Time.fixedDeltaTime * _accelerationIncrease;
+        }
+        _accelerationFactor = Mathf.Clamp(_accelerationFactor, 0.0f, 1.0f);
+
+
         if (_rigidbody != null && !_isJumping)
         {
             _moveDirection.y = 0;
             _moveDirection.Normalize();
-            _moveDirection *= _moveMagnitude * _moveSpeed;
+            _moveDirection *= _moveMagnitude * _maxMoveSpeed * _accelerationCurve.Evaluate(_accelerationFactor);
 
             if(!IsMoveDirectionValid())
             {
