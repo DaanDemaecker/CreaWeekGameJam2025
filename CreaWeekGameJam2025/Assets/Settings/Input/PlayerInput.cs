@@ -305,6 +305,34 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Melee"",
+            ""id"": ""1e36413f-34f7-4c43-950d-f6c66b94e790"",
+            ""actions"": [
+                {
+                    ""name"": ""Melee"",
+                    ""type"": ""Button"",
+                    ""id"": ""47c9fa19-8433-4962-a36b-76ca85f8bd0a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""ca0924b3-073f-409d-9868-7018d214f0d2"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Melee"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -324,6 +352,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         // Taunt
         m_Taunt = asset.FindActionMap("Taunt", throwIfNotFound: true);
         m_Taunt_Taunt = m_Taunt.FindAction("Taunt", throwIfNotFound: true);
+        // Melee
+        m_Melee = asset.FindActionMap("Melee", throwIfNotFound: true);
+        m_Melee_Melee = m_Melee.FindAction("Melee", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
@@ -333,6 +364,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_RotateCamera.enabled, "This will cause a leak and performance issues, PlayerInput.RotateCamera.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Shoot.enabled, "This will cause a leak and performance issues, PlayerInput.Shoot.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Taunt.enabled, "This will cause a leak and performance issues, PlayerInput.Taunt.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Melee.enabled, "This will cause a leak and performance issues, PlayerInput.Melee.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -620,6 +652,52 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         }
     }
     public TauntActions @Taunt => new TauntActions(this);
+
+    // Melee
+    private readonly InputActionMap m_Melee;
+    private List<IMeleeActions> m_MeleeActionsCallbackInterfaces = new List<IMeleeActions>();
+    private readonly InputAction m_Melee_Melee;
+    public struct MeleeActions
+    {
+        private @PlayerInput m_Wrapper;
+        public MeleeActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Melee => m_Wrapper.m_Melee_Melee;
+        public InputActionMap Get() { return m_Wrapper.m_Melee; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(MeleeActions set) { return set.Get(); }
+        public void AddCallbacks(IMeleeActions instance)
+        {
+            if (instance == null || m_Wrapper.m_MeleeActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_MeleeActionsCallbackInterfaces.Add(instance);
+            @Melee.started += instance.OnMelee;
+            @Melee.performed += instance.OnMelee;
+            @Melee.canceled += instance.OnMelee;
+        }
+
+        private void UnregisterCallbacks(IMeleeActions instance)
+        {
+            @Melee.started -= instance.OnMelee;
+            @Melee.performed -= instance.OnMelee;
+            @Melee.canceled -= instance.OnMelee;
+        }
+
+        public void RemoveCallbacks(IMeleeActions instance)
+        {
+            if (m_Wrapper.m_MeleeActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IMeleeActions instance)
+        {
+            foreach (var item in m_Wrapper.m_MeleeActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_MeleeActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public MeleeActions @Melee => new MeleeActions(this);
     public interface IMoveActions
     {
         void OnMove(InputAction.CallbackContext context);
@@ -639,5 +717,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     public interface ITauntActions
     {
         void OnTaunt(InputAction.CallbackContext context);
+    }
+    public interface IMeleeActions
+    {
+        void OnMelee(InputAction.CallbackContext context);
     }
 }

@@ -71,7 +71,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
 
-        _playerShooting = GetComponentInChildren<PlayerShooting>();
+        _playerShooting = GetComponent<PlayerShooting>();
 
         if (_playerShooting != null)
         {
@@ -90,10 +90,16 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             }
         }
 
-        var taunt = FindFirstObjectByType<PlayerTaunt>();
+        var taunt = GetComponent<PlayerTaunt>();
         if (taunt != null)
         {
             _controls.Taunt.SetCallbacks(taunt);
+        }
+
+        var melee = GetComponent<PlayerMelee>();
+        if (melee != null)
+        {
+            _controls.Melee.SetCallbacks(melee);
         }
 
         _controls.Enable();
