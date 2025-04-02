@@ -3,7 +3,7 @@
     <engine:VisualElement class="background" style="flex-grow: 1; justify-content: center; flex-direction: column; width: 50%;">
         <engine:VisualElement name="VisualElement" class="frame" style="flex-grow: 0; align-items: center; justify-content: center; align-self: center; align-content: center; max-height: 80%; min-height: 100px; padding-top: 40px; padding-right: 40px; padding-bottom: 40px; padding-left: 40px; min-width: 100px; max-width: 90%; flex-direction: column;">
             <engine:Label text="Satanic Soup" style="font-size: 96px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; -unity-text-align: upper-center;" />
-            <engine:Button text="   Start" name="StartButton" tabindex="0" />
+            <engine:Button text="&gt; Start" name="StartButton" tabindex="0" />
             <engine:Button text="✖ Quit" name="QuitButton" tabindex="1" />
         </engine:VisualElement>
     </engine:VisualElement>

@@ -6,6 +6,7 @@ using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.Rendering.Universal.Internal;
 
 public class NPCController : MonoBehaviour
 {
@@ -24,9 +25,13 @@ public class NPCController : MonoBehaviour
     float bleedingTime = 5.0f;
     float bleedingTimer = 0.0f;
     bool isDead = false;
+    public bool IsDead
+    {
+        set { isDead = value; }
+        get { return isDead; }
+    }
 
-    public delegate void SmallBloodDropped(Vector3 pos, float size);
-    public static event SmallBloodDropped onSmallBloodDropped;
+    
 
     private bool _isBleeding = false;
     public bool IsBleeding
@@ -34,7 +39,8 @@ public class NPCController : MonoBehaviour
         get { return _isBleeding; }
         set { _isBleeding = value; }
     }
-
+    public delegate void SmallBloodDropped(Vector3 pos, float size);
+    public static event SmallBloodDropped onBloodDropped;
     void Start()
     {
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
@@ -70,14 +76,15 @@ public class NPCController : MonoBehaviour
             bleedingTimer += Time.deltaTime;
             if(bleedingTimer >= bleedingTime)
             {
-                StateMachine.MoveToState(new DeadNPCState(this));
+                var player = FindFirstObjectByType<PlayerMovement>();
+                StateMachine.MoveToState(new DeadNPCState(player.transform.position, this));
             }
         }
     }
 
     private void DropBlood()
     {
-        onSmallBloodDropped.Invoke(transform.position, bloodSize);
+        onBloodDropped.Invoke(transform.position, bloodSize);
 
         bloodTimer = 0;
         bloodCooldown = Random.Range(minDelay, maxDelay);
@@ -116,14 +123,34 @@ public interface IState
 }
 public class DeadNPCState : IState
 {
+    float _bloodSize = 3.0f;
+    Vector3 _playerPos;
+
+    bool _isRotating = true;
+
+    float _degPerSecond = 180.0f;
+
+    public delegate void SmallBloodDropped(Vector3 pos, float size);
+    public static event SmallBloodDropped onBloodDropped;
+
     NPCController context;
-    public DeadNPCState(NPCController ctx)
+    public DeadNPCState(Vector3 playerPos, NPCController ctx)
     {
+        _playerPos = playerPos;
         context = ctx;
     }
     public void OnEnter()
     {
         context.OnDeath.Invoke(true);
+
+        context.IsDead = true;
+
+        onBloodDropped.Invoke(context.transform.position, _bloodSize);
+    }
+
+    private void EndRotation()
+    {
+        _isRotating = false;
         context.transform.localScale = new Vector3(1, .1f, 1);
     }
 
@@ -134,7 +161,20 @@ public class DeadNPCState : IState
 
     public void OnUpdate()
     {
-        //throw new System.NotImplementedException();
+        if (_isRotating)
+        {
+            var forward = context.transform.forward;
+            var target = _playerPos - context.transform.position;
+            forward = Vector3.RotateTowards(forward, target, _degPerSecond * Mathf.Deg2Rad * Time.deltaTime, 0);
+            context.transform.forward = forward;
+
+            float currAngle = Vector3.Angle(forward, target);
+
+            if (currAngle <= 0.5f)
+            {
+                EndRotation();
+            }
+        }
     }
 }
 public class EnterBuildingState : IState
@@ -290,8 +330,6 @@ public class WanderingState : IState
     {
         door = Vector3.zero;
         Collider[] Doors = Physics.OverlapSphere(startPos + dir1 + dir2, dst * 2, 1 << 17);
-
-        Debug.Log("Found " + Doors.Length + " doors");
 
         //if(Doors.Length >= 1)
         if(Doors.Length > 0 && Random.Range(0,1f) > .8f)

@@ -283,6 +283,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Melee",
+            "id": "1e36413f-34f7-4c43-950d-f6c66b94e790",
+            "actions": [
+                {
+                    "name": "Melee",
+                    "type": "Button",
+                    "id": "47c9fa19-8433-4962-a36b-76ca85f8bd0a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "ca0924b3-073f-409d-9868-7018d214f0d2",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Melee",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
