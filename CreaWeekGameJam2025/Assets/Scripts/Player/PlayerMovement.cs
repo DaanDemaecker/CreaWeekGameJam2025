@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -179,7 +180,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         //rotate the player in the direction they are moving
         if (_rigidbody.linearVelocity != Vector3.zero)
         {
-            transform.forward = _rigidbody.linearVelocity;
+            transform.forward =  Vector3.Lerp(transform.forward, _rigidbody.linearVelocity, Time.deltaTime * 4);
         }
 
         //sound
@@ -194,14 +195,37 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         if (Physics.Raycast(transform.position, direction, dst, 1 << 16))
             return false;
-        //if(Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask)){
 
-        //    Debug.Log("Reached EDGE");
-        //    if (Physics.Raycast(transform.position + (direction * 2), -direction, out RaycastHit hit, dst, _bloodLayerMask))
-        //    {
-        //        Debug.Log("Hitting Wall");
-        //    }
-        //}
+        if (!Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask) && direction != Vector3.zero)
+        {
+            Collider[] BloodPiles = Physics.OverlapSphere(transform.position, _epsilon * 2, _bloodLayerMask);
+
+            if (BloodPiles.Length >= 1)
+            {
+                float shortestDist = Mathf.Infinity;
+
+
+                foreach (var Pile in BloodPiles)
+                {
+                    shortestDist = Mathf.Min(shortestDist, Vector3.Distance(Pile.transform.position, transform.position));
+                }
+                Collider closestPile = BloodPiles.Where(x => Vector3.Distance(x.transform.position, transform.position) == shortestDist).First();
+
+                Vector3 normal =  (closestPile.transform.position - transform.position).normalized;
+
+                if(Vector3.Distance(-normal, direction) > .11f)
+                {
+                    newDirection = (Vector3.Reflect(direction, normal) + direction).normalized;
+
+                    newDirection += normal * .2f;
+                    newDirection.y = 0;
+                    newDirection = newDirection.normalized * _maxMoveSpeed;
+
+                    return false;
+                } 
+                
+            }
+        }
 
 
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
