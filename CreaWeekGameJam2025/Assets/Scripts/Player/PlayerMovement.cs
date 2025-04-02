@@ -91,6 +91,12 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
             }
         }
 
+        var taunt = FindFirstObjectByType<PlayerTaunt>();
+        if (taunt != null)
+        {
+            _controls.Taunt.SetCallbacks(taunt);
+        }
+
         _controls.Enable();
 
         _rigidbody = GetComponent<Rigidbody>();

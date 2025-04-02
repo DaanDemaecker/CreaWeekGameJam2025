@@ -22,10 +22,10 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 
     public void OnShootBig(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if (_shootInhibitor == 0 && context.started)
-        {
-            Shoot(_bigProjectile);
-        }
+        //if (_shootInhibitor == 0 && context.started)
+        //{
+        //    Shoot(_bigProjectile);
+        //}
     }
 
     public void OnShootSmall(UnityEngine.InputSystem.InputAction.CallbackContext context)

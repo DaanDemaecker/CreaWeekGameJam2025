@@ -308,6 +308,45 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Taunt"",
+            ""id"": ""3a64be98-388f-4c18-a33f-a38c6b0553a5"",
+            ""actions"": [
+                {
+                    ""name"": ""Taunt"",
+                    ""type"": ""Button"",
+                    ""id"": ""15a1ed7f-a46d-4929-b2ca-5a106d14bccc"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""9dae7648-7106-4c91-bb12-539f11478d7a"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Taunt"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""47cbac3b-56c4-460e-b2e9-36db3597fc83"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Taunt"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -325,6 +364,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_Shoot = asset.FindActionMap("Shoot", throwIfNotFound: true);
         m_Shoot_ShootBig = m_Shoot.FindAction("ShootBig", throwIfNotFound: true);
         m_Shoot_ShootSmall = m_Shoot.FindAction("ShootSmall", throwIfNotFound: true);
+        // Taunt
+        m_Taunt = asset.FindActionMap("Taunt", throwIfNotFound: true);
+        m_Taunt_Taunt = m_Taunt.FindAction("Taunt", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
@@ -333,6 +375,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Jump.enabled, "This will cause a leak and performance issues, PlayerInput.Jump.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_RotateCamera.enabled, "This will cause a leak and performance issues, PlayerInput.RotateCamera.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Shoot.enabled, "This will cause a leak and performance issues, PlayerInput.Shoot.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Taunt.enabled, "This will cause a leak and performance issues, PlayerInput.Taunt.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -582,6 +625,52 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         }
     }
     public ShootActions @Shoot => new ShootActions(this);
+
+    // Taunt
+    private readonly InputActionMap m_Taunt;
+    private List<ITauntActions> m_TauntActionsCallbackInterfaces = new List<ITauntActions>();
+    private readonly InputAction m_Taunt_Taunt;
+    public struct TauntActions
+    {
+        private @PlayerInput m_Wrapper;
+        public TauntActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Taunt => m_Wrapper.m_Taunt_Taunt;
+        public InputActionMap Get() { return m_Wrapper.m_Taunt; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(TauntActions set) { return set.Get(); }
+        public void AddCallbacks(ITauntActions instance)
+        {
+            if (instance == null || m_Wrapper.m_TauntActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_TauntActionsCallbackInterfaces.Add(instance);
+            @Taunt.started += instance.OnTaunt;
+            @Taunt.performed += instance.OnTaunt;
+            @Taunt.canceled += instance.OnTaunt;
+        }
+
+        private void UnregisterCallbacks(ITauntActions instance)
+        {
+            @Taunt.started -= instance.OnTaunt;
+            @Taunt.performed -= instance.OnTaunt;
+            @Taunt.canceled -= instance.OnTaunt;
+        }
+
+        public void RemoveCallbacks(ITauntActions instance)
+        {
+            if (m_Wrapper.m_TauntActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(ITauntActions instance)
+        {
+            foreach (var item in m_Wrapper.m_TauntActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_TauntActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public TauntActions @Taunt => new TauntActions(this);
     public interface IMoveActions
     {
         void OnMove(InputAction.CallbackContext context);
@@ -598,5 +687,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     {
         void OnShootBig(InputAction.CallbackContext context);
         void OnShootSmall(InputAction.CallbackContext context);
+    }
+    public interface ITauntActions
+    {
+        void OnTaunt(InputAction.CallbackContext context);
     }
 }
