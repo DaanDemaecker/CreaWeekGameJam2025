@@ -29,8 +29,7 @@ public class NPCController : MonoBehaviour
         get { return isDead; }
     }
 
-    public delegate void SmallBloodDropped(Vector3 pos, float size);
-    public static event SmallBloodDropped onSmallBloodDropped;
+    
 
     private bool _isBleeding = false;
     public bool IsBleeding
@@ -38,7 +37,8 @@ public class NPCController : MonoBehaviour
         get { return _isBleeding; }
         set { _isBleeding = value; }
     }
-
+    public delegate void SmallBloodDropped(Vector3 pos, float size);
+    public static event SmallBloodDropped onBloodDropped;
     void Start()
     {
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
@@ -82,7 +82,7 @@ public class NPCController : MonoBehaviour
 
     private void DropBlood()
     {
-        onSmallBloodDropped.Invoke(transform.position, bloodSize);
+        onBloodDropped.Invoke(transform.position, bloodSize);
 
         bloodTimer = 0;
         bloodCooldown = Random.Range(minDelay, maxDelay);
@@ -121,6 +121,11 @@ public interface IState
 }
 public class DeadNPCState : IState
 {
+    float bloodSize = 3.0f;
+
+    public delegate void SmallBloodDropped(Vector3 pos, float size);
+    public static event SmallBloodDropped onBloodDropped;
+
     NPCController context;
     public DeadNPCState(NPCController ctx)
     {
@@ -130,6 +135,8 @@ public class DeadNPCState : IState
     {
         context.OnDeath.Invoke();
         context.transform.localScale = new Vector3(1, .1f, 1);
+
+        onBloodDropped.Invoke(context.transform.position, bloodSize);
     }
 
     public void OnExit()
