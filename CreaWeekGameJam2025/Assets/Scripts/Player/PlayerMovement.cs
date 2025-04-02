@@ -23,10 +23,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private float _maxMoveSpeed = 10.0f;
 
     [SerializeField]
-    private AnimationCurve _accelerationCurve;
-
-    private float _accelerationFactor = 0f;
-    private float _accelerationIncrease = 1f;
+    private float _accelerationIncrease = 30f;
 
 
     [SerializeField]
@@ -105,11 +102,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if(!_canMove)
-        {
-            return;
-        }
-
         if (context.performed)
         {
             _directionHeld = true;
@@ -140,37 +132,41 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
     void FixedUpdate()
     {
-        if(_directionHeld)
+        if (_rigidbody != null)
         {
-            _accelerationFactor += Time.fixedDeltaTime * _accelerationIncrease;
-        }
-        else
-        {
-            _accelerationFactor -= Time.fixedDeltaTime * _accelerationIncrease;
-        }
-        _accelerationFactor = Mathf.Clamp(_accelerationFactor, 0.0f, 1.0f);
-
-
-        if (_rigidbody != null && !_isJumping)
-        {
-            _moveDirection.y = 0;
-            _moveDirection.Normalize();
-            _moveDirection *= _moveMagnitude * _maxMoveSpeed * _accelerationCurve.Evaluate(_accelerationFactor);
-
-            if(!IsMoveDirectionValid())
+            if (!_isJumping)
             {
-                _moveDirection.x = 0;
-                _moveDirection.z = 0;
-            }
+                var velocity = _rigidbody.linearVelocity;
 
-            _moveDirection.y = _rigidbody.linearVelocity.y;
-            _rigidbody.linearVelocity = _moveDirection;
+                if (_directionHeld)
+                {
+                    velocity += _moveDirection * Time.fixedDeltaTime * _accelerationIncrease;
+
+                    var magnitude = velocity.magnitude;
+
+                    magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
+
+                    velocity = velocity.normalized * magnitude;
+                }
+                else
+                {
+                    var magnitude = velocity.magnitude;
+
+                    magnitude -= _accelerationIncrease * Time.fixedDeltaTime;
+
+                    magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
+
+                    velocity = velocity.normalized * magnitude;
+                }
+
+                _rigidbody.linearVelocity = velocity;
+            }
         }
     }
 
-    bool IsMoveDirectionValid()
+    bool IsMoveDirectionValid(Vector3 direction)
     {
-        Ray ray = new Ray(transform.position + _moveDirection * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
+        Ray ray = new Ray(transform.position + direction.normalized * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
 
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
         return result;
