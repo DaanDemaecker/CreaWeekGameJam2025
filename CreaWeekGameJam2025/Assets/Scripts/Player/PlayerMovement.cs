@@ -41,6 +41,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private VisualEffect _bloodSplash;
 
     [SerializeField]
+    private VisualEffect _death;
+
+    [SerializeField]
     private float _jumpDuration = 0.5f;
 
     [SerializeField]
@@ -109,6 +112,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _bloodLayerMask = LayerMask.GetMask("Blood");
 
         _bloodSplash.Stop();
+        _death.Stop();
     }
 
     public void OnEnable()
@@ -179,9 +183,10 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 velocity = velocity.normalized * magnitude;
             }
 
-            if(!_isJumping && !IsMoveDirectionValid(velocity))
+            if(!_isJumping && !IsMoveDirectionValid(_moveDirection, out Vector3 newvel))
             {
-               velocity = Vector3.zero;
+               velocity = newvel;
+                
             }
 
             _rigidbody.linearVelocity = velocity;
@@ -198,10 +203,23 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
 
     }
-
-    bool IsMoveDirectionValid(Vector3 direction)
+    [SerializeField] float dst;
+    bool IsMoveDirectionValid(Vector3 direction, out Vector3 newDirection)
     {
+        newDirection = Vector3.zero;    
         Ray ray = new Ray(transform.position + direction * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
+
+        if (Physics.Raycast(transform.position, direction, dst, 1 << 16))
+            return false;
+        //if(Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask)){
+
+        //    Debug.Log("Reached EDGE");
+        //    if (Physics.Raycast(transform.position + (direction * 2), -direction, out RaycastHit hit, dst, _bloodLayerMask))
+        //    {
+        //        Debug.Log("Hitting Wall");
+        //    }
+        //}
+
 
         bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
         return result;
@@ -212,6 +230,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     IEnumerator Jump(Vector3 nextBloodpool)
     {
         //animations and sound
+        _bloodSplash.SetBool("HeavySplash", false);
         _bloodSplash.Play();
         
         // start jumping
@@ -242,7 +261,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                         BodyParts[i].transform.localPosition = Vector3.zero +
                             (i * Vector3.down * .4f);
                     }
-
+                    _death.Play();
+                    yield return new WaitForEndOfFrame();
                     transform.position = _jumpStart;
                     animate = false;
                 }
@@ -251,6 +271,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 if (doFX)
                 {
                     doFX = false;
+                    _bloodSplash.SetBool("HeavySplash", true);
                     _bloodSplash.Play();
                     _jumpSound.Play();
                 }

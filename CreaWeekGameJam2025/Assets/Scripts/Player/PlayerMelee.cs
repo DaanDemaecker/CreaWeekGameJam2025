@@ -45,10 +45,9 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
 
         foreach (var npc in npcsInRange)
         {
-            if (!npc.IsBleeding)
-            {
-                npc.StateMachine.MoveToState(new DeadNPCState(transform.position, npc));
-            }
+            
+            npc.StateMachine.MoveToState(new DeadNPCState(transform.position, npc));
+            
         }
 
         //animation and SFX

@@ -59,9 +59,9 @@ public class NPCController : MonoBehaviour
         while(startTime + .5f >= Time.time)
         {
             animator.SetFloat("Bleeding", Mathf.Lerp(v ? 0f : 1f, v ? 1f : 0f, (Time.time - startTime) / .5f));
+            yield return null;
         }
 
-        yield return null;
     }
 
     // Update is called once per frame
@@ -71,7 +71,6 @@ public class NPCController : MonoBehaviour
 
         if(_isBleeding)
         {
-            
             HandleBleeding();
         }  
     }
@@ -96,7 +95,7 @@ public class NPCController : MonoBehaviour
             if(bleedingTimer >= bleedingTime)
             {
                 var player = FindFirstObjectByType<PlayerMovement>();
-                StateMachine.MoveToState(new DeadNPCState(player.transform.position, this));
+                //StateMachine.MoveToState(new DeadNPCState(player.transform.position, this));
             }
         }
     }
@@ -145,7 +144,8 @@ public class DeadNPCState : IState
     float _bloodSize = 3.0f;
     Vector3 _playerPos;
 
-    bool _isRotating = true;
+    float _time = 0;
+    bool _sinking = false;
 
     float _degPerSecond = 180.0f;
 
@@ -170,12 +170,14 @@ public class DeadNPCState : IState
         context.IsDead = true;
 
         onBloodDropped.Invoke(context.transform.position, _bloodSize);
+
+
     }
 
     private void EndRotation()
     {
-        _isRotating = false;
-        context.transform.localScale = new Vector3(1, .1f, 1);
+        _time = 0;
+        _sinking = false;
     }
 
     public void OnExit()
@@ -185,18 +187,17 @@ public class DeadNPCState : IState
 
     public void OnUpdate()
     {
-        if (_isRotating)
+        _time += Time.deltaTime;
+
+        if(_time >= 5)
         {
-            var forward = context.transform.forward;
-            var target = _playerPos - context.transform.position;
-            forward = Vector3.RotateTowards(forward, target, _degPerSecond * Mathf.Deg2Rad * Time.deltaTime, 0);
-            context.transform.forward = forward;
+            _sinking = true;
 
-            float currAngle = Vector3.Angle(forward, target);
-
-            if (currAngle <= 0.5f)
+            context.transform.position -= Vector3.up * Time.deltaTime;
+            
+            if(_time >= 6)
             {
-                EndRotation();
+                 context.Destroy();
             }
         }
     }
@@ -205,7 +206,7 @@ public class EnterBuildingState : IState
 {
     NPCController context;
 
-    float speed = 2f;
+    float speed = .6f;
     float dst = 3;
 
     float hideLength = 5f;
@@ -250,6 +251,9 @@ public class EnterBuildingState : IState
             Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime);
 
             Vector3 targetPosition = Vector3.Lerp(pos1, pos2, normalizedTime);
+
+            Vector3 direction = targetPosition - context.transform.position;
+            context.transform.forward = direction;
 
             context.transform.position = targetPosition;
         } else
