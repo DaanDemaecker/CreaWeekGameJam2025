@@ -12,8 +12,8 @@ EditorBuildSettings:
     path: Assets/Scenes/TitleScreen.unity
     guid: a689dddb96fe99548aa52c332ac499b5
   - enabled: 1
-    path: Assets/Scenes/GameScene.unity
-    guid: 73a5f4e336058cb4883083247cd0b0cd
+    path: Assets/Scenes/Final Scene DO TOUCH.unity
+    guid: 452f8b5cef3555645a4e7e5de6f533cf
   - enabled: 1
     path: Assets/Scenes/EndScene.unity
     guid: a4a590bed99430548a112aea6e4c7626

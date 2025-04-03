@@ -325,14 +325,14 @@ public class WanderingState : IState
                 dir1.Normalize();
                 dir1 *= dst;
 
-            } while (!IsValidPosition(startPos + dir1 + dir1) && Physics.Raycast(startPos + Vector3.up, dir1, dst, 1 << 16));
+            } while (!IsValidPosition(startPos + dir1 + dir1) || Physics.Raycast(startPos + Vector3.up, dir1, dst, 1 << 16));
 
         }
 
         do
         {
             dir2 = Quaternion.Euler(0, Random.Range(-145, 145), 0) * dir1;
-        } while (!IsValidPosition(startPos + dir1 + dir2) && Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
+        } while (!IsValidPosition(startPos + dir1 + dir2) || Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
     }
 
     bool IsValidPosition(Vector3 pos)
@@ -437,7 +437,7 @@ public class ChasingState : IState
             dir2 = Quaternion.Euler(0, Random.Range(-180, 180), 0) * dir1;
         } 
         while (!IsFacingTowardsPlayer() || 
-        (!IsValidPosition(startPos + dir1 + dir2) && 
+        (!IsValidPosition(startPos + dir1 + dir2) || 
         Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16)));
     }
 

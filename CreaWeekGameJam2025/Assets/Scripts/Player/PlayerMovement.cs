@@ -74,6 +74,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        StartCoroutine(SwimUp());
+
         _controls = new PlayerInput();
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
@@ -117,6 +119,37 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         _bloodSplash.Stop();
         _death.Stop();
+    }
+
+    IEnumerator SwimUp()
+    {
+        _canJump = false ;
+
+        for (int i = 0; i < BodyParts.Count; i++)
+        {
+            BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
+            BodyParts[i].transform.localPosition = Vector3.zero +
+                (i * Vector3.down * .4f);
+        }
+
+
+        float startTime = Time.time;
+        while (!_isJumping && startTime + .6f >= Time.time)
+        {
+            Vector3 startPos = Vector3.down * .5f;
+            Vector3 endPos = Vector3.zero;
+
+            BodyParts[0].transform.localPosition = Vector3.Lerp(startPos, endPos, (Time.time - startTime) / .6f);
+
+            Quaternion startRot = Quaternion.Euler(-90, 0, 0);
+            Quaternion endRot = Quaternion.Euler(0, 0, 0);
+
+            BodyParts[0].transform.localRotation = Quaternion.Lerp(startRot, endRot, (Time.time - startTime) / .6f);
+            yield return null;
+        }
+
+        _canJump = true;
+        yield return null;
     }
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {

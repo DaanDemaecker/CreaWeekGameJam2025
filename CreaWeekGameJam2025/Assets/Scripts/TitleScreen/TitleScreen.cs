@@ -36,6 +36,6 @@ public class TitleScreen : MonoBehaviour
 
     private void _playButton_clicked()
     {
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene(1);
     }
 }
