@@ -17,6 +17,9 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
     [SerializeField]
     private VisualEffect _taunt;
 
+    [SerializeField]
+    private AudioSource _tauntSound;
+
 
     public void Start()
     {
@@ -63,6 +66,8 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
         }
 
         _taunt.Play();
+
+        _tauntSound.Play();
     }
 
     NPCController GetClosestNpc()

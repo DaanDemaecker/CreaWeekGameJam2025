@@ -80,10 +80,10 @@ public class PlayerBloodTracker : MonoBehaviour
 
     private void EnemyHit()
     {
-        if(_countEnemyHit)
-        {
-            FillBar();
-        }
+        //if(_countEnemyHit)
+        //{
+        //    //FillBar();
+        //}
     }
 
     private void EnemyKilled()
