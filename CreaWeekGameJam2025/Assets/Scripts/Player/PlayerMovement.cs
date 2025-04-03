@@ -59,10 +59,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     [SerializeField]
     private List<Transform> BodyParts = new List<Transform>();
 
-
-    [SerializeField]
-    private float _jumpCooldown = 0.25f;
-
     private bool _isJumping = false;
 
 
