@@ -143,14 +143,19 @@
 }
 
 .unity-progress-bar__progress {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    background-color: rgba(221, 30, 30, 0);
-    background-image: url("project://database/Assets/Textures/bloodbar_bar.png?fileID=21300000&guid=1979cc3d7f149de49b119e839d6625a1&type=3#bloodbar_bar");
+    background-color: rgb(221, 30, 30);
+    background-image: none;
+    -unity-slice-left: 1;
+    -unity-slice-top: 1;
+    -unity-slice-right: 1;
+    -unity-slice-bottom: 1;
+    -unity-slice-scale: 1px;
 }
