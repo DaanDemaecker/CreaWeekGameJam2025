@@ -449,7 +449,6 @@ public class ChasingState : IState
     bool IsFacingTowardsPlayer()
     {
         float dot = Vector3.Dot((_player.position - context.transform.position).normalized, (dir1 + dir2).normalized);
-        Debug.Log(dot + " : " + (dot > 0.8f ? "True" : "False"));
         return dot > 0.8f;
     }
     public void OnEnter()

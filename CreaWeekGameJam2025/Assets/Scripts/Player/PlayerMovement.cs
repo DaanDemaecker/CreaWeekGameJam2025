@@ -310,9 +310,10 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
             }
 
-            if(lerpFactor >= 1.2f)
+            if(lerpFactor >= 1.1f)
             {
-                _isJumping = false;
+                _canJump = false;
+                animate = false;
             }
 
             for (int i = 0; i < BodyParts.Count; i++)
