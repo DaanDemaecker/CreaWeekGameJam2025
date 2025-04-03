@@ -46,7 +46,19 @@ public class NPCController : MonoBehaviour
             if (_isBleeding == value) return;
 
             _isBleeding = value;
+
+            if (value)
+            {
+                _bleeding.Play();
+            }
+            else
+            {
+                _bleeding.Stop();
+            }
+
             StartCoroutine(ChangeBleeding(value));
+
+            
         }
     }
     public delegate void SmallBloodDropped(Vector3 pos, float size);
@@ -60,8 +72,6 @@ public class NPCController : MonoBehaviour
 
     IEnumerator ChangeBleeding(bool v)
     {
-        _bleeding.Play();
-
         float startTime = Time.time;
 
         while(startTime + .5f >= Time.time)
@@ -69,9 +79,6 @@ public class NPCController : MonoBehaviour
             animator.SetFloat("Bleeding", Mathf.Lerp(v ? 0f : 1f, v ? 1f : 0f, (Time.time - startTime) / .5f));
             yield return null;
         }
-
-        
-
     }
 
     // Update is called once per frame
@@ -227,7 +234,7 @@ public class EnterBuildingState : IState
 {
     NPCController context;
 
-    float speed = .6f;
+    float speed = 2f;
     float dst = 3;
 
     float hideLength = 5f;
@@ -253,7 +260,7 @@ public class EnterBuildingState : IState
     }   
     public void OnEnter()
     {
-        
+        context.IsBleeding = false;
     }
 
     public void OnExit()
@@ -268,8 +275,8 @@ public class EnterBuildingState : IState
         {
             float normalizedTime = time / speed;
 
-            Vector3 pos1 = startPos + Vector3.Lerp(Vector3.zero, dir1, normalizedTime);
-            Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime);
+            Vector3 pos1 = startPos + Vector3.Lerp(Vector3.zero, dir1, normalizedTime/ dir2.magnitude);
+            Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime / dir2.magnitude);
 
             Vector3 targetPosition = Vector3.Lerp(pos1, pos2, normalizedTime);
 
@@ -331,7 +338,7 @@ public class WanderingState : IState
 
         do
         {
-            dir2 = Quaternion.Euler(0, Random.Range(-145, 145), 0) * dir1;
+            dir2 = Quaternion.Euler(0, Random.Range(-180, 180), 0) * dir1;
         } while (!IsValidPosition(startPos + dir1 + dir2) || Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
     }
 
@@ -387,7 +394,7 @@ public class WanderingState : IState
         Collider[] Doors = Physics.OverlapSphere(startPos + dir1 + dir2, dst * 2, 1 << 17);
 
         //if(Doors.Length >= 1)
-        if(Doors.Length > 0 && Random.Range(0,1f) > .8f)
+        if(Doors.Length > 0 && (context.IsBleeding || Random.Range(0,1f) > .8f))
         {
             door = Doors[(int)Random.Range(0, Doors.Length)].transform.position;
             return true;
