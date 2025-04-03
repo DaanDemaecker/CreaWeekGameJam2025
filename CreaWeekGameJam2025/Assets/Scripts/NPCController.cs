@@ -310,8 +310,6 @@ public class WanderingState : IState
 
         startPos = context.transform.position;
 
-
-
         if (startForward != Vector3.zero)
         {
             dir1 = startForward.normalized * dst;
@@ -327,14 +325,19 @@ public class WanderingState : IState
                 dir1.Normalize();
                 dir1 *= dst;
 
-            } while (Physics.Raycast(startPos + Vector3.up, dir1, dst, 1 << 16));
+            } while (!IsValidPosition(startPos + dir1 + dir1) && Physics.Raycast(startPos + Vector3.up, dir1, dst, 1 << 16));
 
         }
 
         do
         {
             dir2 = Quaternion.Euler(0, Random.Range(-145, 145), 0) * dir1;
-        } while (Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
+        } while (!IsValidPosition(startPos + dir1 + dir2) && Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
+    }
+
+    bool IsValidPosition(Vector3 pos)
+    {
+        return Physics.CheckSphere(pos, .1f, 1 << 18);
     }
 
     public void OnEnter()
@@ -391,28 +394,64 @@ public class WanderingState : IState
         } 
 
         return false;
-
-
     }
 }
 
 public class ChasingState : IState
 {
 
-    NPCController _context;
+    NPCController context;
 
     Transform _player;
 
-    float _chasingDuration = 2.5f;
-    float _timer = 0;
-    float _speed = 2.0f;
+    float time = 0;
 
-    public ChasingState(Transform player, NPCController ctx)
+    float speed = 2f;
+    float dst = 3;
+
+    Vector3 startPos;
+
+    Vector3 dir1;
+    Vector3 dir2;
+
+    public ChasingState(Vector3 startForward, Transform player, NPCController ctx)
     {
-        _context = ctx;
         _player = player;
+        context = ctx;
+
+        float time = 0;
+
+        startPos = context.transform.position;
+
+        if (startForward != Vector3.zero)
+        {
+            dir1 = startForward;
+        } else
+        {
+            dir1 = (_player.position - context.transform.position).normalized * dst;
+        }
+        
+
+        do
+        {
+            dir2 = Quaternion.Euler(0, Random.Range(-180, 180), 0) * dir1;
+        } 
+        while (!IsFacingTowardsPlayer() || 
+        (!IsValidPosition(startPos + dir1 + dir2) && 
+        Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16)));
     }
 
+    bool IsValidPosition(Vector3 pos)
+    {
+        return Physics.CheckSphere(pos, .1f, 1 << 18);
+    }
+
+    bool IsFacingTowardsPlayer()
+    {
+        float dot = Vector3.Dot((_player.position - context.transform.position).normalized, (dir1 + dir2).normalized);
+        Debug.Log(dot + " : " + (dot > 0.8f ? "True" : "False"));
+        return dot > 0.8f;
+    }
     public void OnEnter()
     {
         
@@ -423,16 +462,38 @@ public class ChasingState : IState
     }
     public void OnUpdate()
     {
-        var direction = _player.transform.position - _context.transform.position;
-        direction.y = 0;
+        time += Time.deltaTime;
 
-        _context.transform.position = _context.transform.position + direction.normalized * _speed * Time.deltaTime;
-
-        _timer += Time.deltaTime;
-
-        if (_timer > _chasingDuration)
+        if (time <= speed)
         {
-            _context.StateMachine.MoveToState(new WanderingState(Vector3.zero, _context));
+            float normalizedTime = time / speed;
+
+            Vector3 pos1 = startPos + Vector3.Lerp(Vector3.zero, dir1, normalizedTime);
+            Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime);
+
+            Vector3 targetPosition = Vector3.Lerp(pos1, pos2, normalizedTime);
+
+            Vector3 direction = targetPosition - context.transform.position;
+            
+            context.transform.forward = direction;
+            context.transform.position = targetPosition;
+
         }
+        else
+        {
+            if (Vector3.Distance(context.transform.position, _player.position) <= 6)
+            {
+                context.StateMachine.MoveToState(new WanderingState(dir2, context));
+            }
+            else
+            {
+                context.StateMachine.MoveToState(new ChasingState(dir2,_player, context));
+            }
+        }
+
+        //if (time > _chasingDuration)
+        //{
+        //    context.StateMachine.MoveToState(new WanderingState(Vector3.zero, context));
+        //}
     }
 }
