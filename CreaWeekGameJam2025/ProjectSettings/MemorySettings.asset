@@ -4,32 +4,38 @@
 MemorySettings:
   m_ObjectHideFlags: 0
   m_EditorMemorySettings:
-    m_MainAllocatorBlockSize: -1
-    m_ThreadAllocatorBlockSize: -1
-    m_MainGfxBlockSize: -1
-    m_ThreadGfxBlockSize: -1
-    m_CacheBlockSize: -1
-    m_TypetreeBlockSize: -1
-    m_ProfilerBlockSize: -1
-    m_ProfilerEditorBlockSize: -1
-    m_BucketAllocatorGranularity: -1
-    m_BucketAllocatorBucketsCount: -1
-    m_BucketAllocatorBlockSize: -1
-    m_BucketAllocatorBlockCount: -1
-    m_ProfilerBucketAllocatorGranularity: -1
-    m_ProfilerBucketAllocatorBucketsCount: -1
-    m_ProfilerBucketAllocatorBlockSize: -1
-    m_ProfilerBucketAllocatorBlockCount: -1
-    m_TempAllocatorSizeMain: -1
-    m_JobTempAllocatorBlockSize: -1
-    m_BackgroundJobTempAllocatorBlockSize: -1
-    m_JobTempAllocatorReducedBlockSize: -1
-    m_TempAllocatorSizeGIBakingWorker: -1
-    m_TempAllocatorSizeNavMeshWorker: -1
-    m_TempAllocatorSizeAudioWorker: -1
-    m_TempAllocatorSizeCloudWorker: -1
-    m_TempAllocatorSizeGfx: -1
-    m_TempAllocatorSizeJobWorker: -1
-    m_TempAllocatorSizeBackgroundWorker: -1
-    m_TempAllocatorSizePreloadManager: -1
+    # General Allocators
+    m_MainAllocatorBlockSize: 16777216        # 16 MB
+    m_ThreadAllocatorBlockSize: 8388608       # 8 MB
+    # Graphics Allocators
+    m_MainGfxBlockSize: 33554432              # 32 MB
+    m_ThreadGfxBlockSize: 16777216            # 16 MB
+    # Cache and Typetree
+    m_CacheBlockSize: 4194304                 # 4 MB
+    m_TypetreeBlockSize: 2097152              # 2 MB
+    # Profiler Settings
+    m_ProfilerBlockSize: 1048576              # 1 MB
+    m_ProfilerEditorBlockSize: 2097152        # 2 MB
+    m_ProfilerBucketAllocatorGranularity: 16  # 16 bytes
+    m_ProfilerBucketAllocatorBucketsCount: 16 # 16 buckets
+    m_ProfilerBucketAllocatorBlockSize: 1048576  # 1 MB
+    m_ProfilerBucketAllocatorBlockCount: 8    # 8 blocks
+    # Bucket Allocator Settings
+    m_BucketAllocatorGranularity: 16          # 16 bytes
+    m_BucketAllocatorBucketsCount: 32         # 32 buckets
+    m_BucketAllocatorBlockSize: 2097152       # 2 MB
+    m_BucketAllocatorBlockCount: 16           # 16 blocks
+    # Temporary Allocators
+    m_TempAllocatorSizeMain: 33554432         # 32 MB
+    m_JobTempAllocatorBlockSize: 8388608      # 8 MB
+    m_BackgroundJobTempAllocatorBlockSize: 8388608  # 8 MB
+    m_JobTempAllocatorReducedBlockSize: 2097152    # 2 MB
+    m_TempAllocatorSizeGIBakingWorker: 4194304     # 4 MB
+    m_TempAllocatorSizeNavMeshWorker: 4194304      # 4 MB
+    m_TempAllocatorSizeAudioWorker: 2097152        # 2 MB
+    m_TempAllocatorSizeCloudWorker: 1048576        # 1 MB
+    m_TempAllocatorSizeGfx: 33554432          # 32 MB
+    m_TempAllocatorSizeJobWorker: 8388608     # 8 MB
+    m_TempAllocatorSizeBackgroundWorker: 8388608  # 8 MB
+    m_TempAllocatorSizePreloadManager: 16777216   # 16 MB
   m_PlatformMemorySettings: {}
