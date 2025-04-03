@@ -1,8 +1,8 @@
 using UnityEditor;
 using UnityEngine;
 
-public class RandomScaleEditor : MonoBehaviour
-{
+public class RandomScaleEditor : MonoBehaviour { 
+
 //    [MenuItem("Tools/Randomize Scale %s")] // Shortcut: Ctrl+S (Windows) / Cmd+S (Mac)
 //    static void RandomizeScale()
 //    {

@@ -11,10 +11,13 @@ using UnityEngine.VFX;
 
 public class NPCController : MonoBehaviour
 {
+    public delegate void EnemyHit();
+    public static event EnemyHit onEnemyHit;
+
     [HideInInspector] public StateMachine StateMachine;
     [SerializeField] private Animator animator;
 
-    [SerializeField] public UnityEvent<bool> OnDeath;
+    [SerializeField] public UnityEvent OnDeath;
 
     [SerializeField]
     public VisualEffect _bleeding;
@@ -24,6 +27,9 @@ public class NPCController : MonoBehaviour
 
     [SerializeField]
     public AudioSource _gotHitSound;
+
+    [SerializeField]
+    private int _health = 2;
 
     // Bleeding variables
     float minDelay = 1.5f;
@@ -130,6 +136,23 @@ public class NPCController : MonoBehaviour
         
     }
 
+    public void Hit()
+    {
+        HitFX();
+
+        IsBleeding = true;
+
+        onEnemyHit.Invoke();
+
+        _health--;
+
+        if(_health <= 0)
+        {
+            IsDead = true;
+            StateMachine.MoveToState(new DeadNPCState(transform.position, this));
+        }
+    }
+
     public void HitFX()
     {
         ScreenShake cameraShake = null;
@@ -208,11 +231,11 @@ public class DeadNPCState : IState
     }
     public void OnEnter()
     {
-        context.OnDeath.Invoke(true);
+        context.IsDead = true;
+
+        context.OnDeath.Invoke();
 
         onEnemyKilled.Invoke();
-
-        context.IsDead = true;
 
         onBloodDropped.Invoke(context.transform.position, _bloodSize);
 
@@ -373,7 +396,7 @@ public class WanderingState : IState
 
     bool IsValidPosition(Vector3 pos)
     {
-        return Physics.CheckSphere(pos, .1f, 1 << 18);
+        return Physics.CheckSphere(pos, 1f, 1 << 18);
     }
 
     public void OnEnter()
@@ -473,13 +496,13 @@ public class ChasingState : IState
             dir2 = Quaternion.Euler(0, Random.Range(-180, 180), 0) * dir1;
         } 
         while (!IsFacingTowardsPlayer() || 
-        (!IsValidPosition(startPos + dir1 + dir2) || 
-        Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16)));
+        !IsValidPosition(startPos + dir1 + dir2) || 
+        Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
     }
 
     bool IsValidPosition(Vector3 pos)
     {
-        return Physics.CheckSphere(pos, .1f, 1 << 18);
+        return Physics.CheckSphere(pos, 1f, 1 << 18);
     }
 
     bool IsFacingTowardsPlayer()

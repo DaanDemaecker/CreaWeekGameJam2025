@@ -49,7 +49,7 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
         foreach (var npc in npcsInRange)
         {
 
-            npc.StateMachine.MoveToState(new DeadNPCState(transform.position, npc));
+            npc.Hit();
 
         }
 
