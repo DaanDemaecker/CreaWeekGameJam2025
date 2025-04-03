@@ -68,6 +68,10 @@
     transition-timing-function: ease-in-bounce;
     transition-delay: 0s;
     transition-duration: 0.1s;
+    border-left-color: rgba(156, 51, 38, 0);
+    border-right-color: rgba(156, 51, 38, 0);
+    border-top-color: rgba(156, 51, 38, 0);
+    border-bottom-color: rgba(156, 51, 38, 0);
 }
 
 .unity-button:focus {
@@ -94,6 +98,10 @@
     transition-timing-function: ease-in-bounce;
     transition-delay: 0s;
     transition-duration: 0.1s;
+    border-left-color: rgb(159, 51, 38);
+    border-right-color: rgb(159, 51, 38);
+    border-top-color: rgb(159, 51, 38);
+    border-bottom-color: rgb(159, 51, 38);
 }
 
 .unity-button:active {
@@ -127,10 +135,11 @@
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
-    border-top-width: 5px;
-    border-right-width: 5px;
-    border-bottom-width: 5px;
-    border-left-width: 5px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgba(163, 163, 163, 0.74);
 }
 
 .unity-progress-bar__progress {
@@ -142,5 +151,6 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    background-color: rgb(221, 30, 30);
+    background-color: rgba(221, 30, 30, 0);
+    background-image: url("project://database/Assets/Textures/bloodbar_bar.png?fileID=21300000&guid=1979cc3d7f149de49b119e839d6625a1&type=3#bloodbar_bar");
 }
