@@ -115,8 +115,8 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _HighlightStep: 0.13
-    - _HighlightStrength: 0.2
+    - _HighlightStep: 0.151
+    - _HighlightStrength: 0.08
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -124,8 +124,8 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Rotation: 0
-    - _ShadowStep: 0.406
-    - _ShadowStrength: 0.733
+    - _ShadowStep: 0.769
+    - _ShadowStrength: 0.598
     - _Smoothness: 0.191
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
