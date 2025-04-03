@@ -1,0 +1,11 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/TitleScreen.uss?fileID=7433441132597879392&amp;guid=5354000272c605a4fb85acd114c09cc5&amp;type=3#TitleScreen" />
+    <engine:VisualElement class="background" style="flex-grow: 1; justify-content: center; flex-direction: column; background-color: rgba(96, 20, 24, 0.6);">
+        <engine:VisualElement name="VisualElement" class="frame" style="flex-grow: 0; align-items: center; justify-content: center; align-self: center; align-content: center; max-height: 80%; min-height: 100px; padding-top: 40px; padding-right: 40px; padding-bottom: 40px; padding-left: 40px; min-width: 100px; max-width: 90%; flex-direction: column;">
+            <engine:Label text="You Win!" style="font-size: 96px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; -unity-text-align: upper-center;" />
+            <engine:Label text="You killed the cult leader!" enabled="true" enable-rich-text="true" style="font-size: 64px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; -unity-text-align: upper-center; display: flex;" />
+            <engine:Button text="Play Again" name="StartButton" tabindex="0" />
+            <engine:Button text="✖ Quit" name="QuitButton" tabindex="1" />
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>
