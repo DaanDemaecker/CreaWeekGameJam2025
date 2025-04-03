@@ -231,11 +231,11 @@ public class DeadNPCState : IState
     }
     public void OnEnter()
     {
+        context.IsDead = true;
+
         context.OnDeath.Invoke(true);
 
         onEnemyKilled.Invoke();
-
-        context.IsDead = true;
 
         onBloodDropped.Invoke(context.transform.position, _bloodSize);
 
@@ -396,7 +396,7 @@ public class WanderingState : IState
 
     bool IsValidPosition(Vector3 pos)
     {
-        return Physics.CheckSphere(pos, .1f, 1 << 18);
+        return Physics.CheckSphere(pos, 1f, 1 << 18);
     }
 
     public void OnEnter()
@@ -496,13 +496,13 @@ public class ChasingState : IState
             dir2 = Quaternion.Euler(0, Random.Range(-180, 180), 0) * dir1;
         } 
         while (!IsFacingTowardsPlayer() || 
-        (!IsValidPosition(startPos + dir1 + dir2) || 
-        Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16)));
+        !IsValidPosition(startPos + dir1 + dir2) || 
+        Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
     }
 
     bool IsValidPosition(Vector3 pos)
     {
-        return Physics.CheckSphere(pos, .1f, 1 << 18);
+        return Physics.CheckSphere(pos, 1f, 1 << 18);
     }
 
     bool IsFacingTowardsPlayer()
