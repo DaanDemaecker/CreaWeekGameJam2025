@@ -23,7 +23,7 @@ public class NPCController : MonoBehaviour
     public AudioSource _gotHitSound;
 
     [SerializeField]
-    private int _health = 2;
+    private float _health = 2;
 
     // Bleeding variables
     float minDelay = 1.5f;
@@ -130,7 +130,7 @@ public class NPCController : MonoBehaviour
         
     }
 
-    public void Hit()
+    public void Hit(float damage)
     {
         HitFX();
 
@@ -138,7 +138,7 @@ public class NPCController : MonoBehaviour
 
         onEnemyHit.Invoke();
 
-        _health--;
+        _health -= damage;
 
         if(_health <= 0)
         {

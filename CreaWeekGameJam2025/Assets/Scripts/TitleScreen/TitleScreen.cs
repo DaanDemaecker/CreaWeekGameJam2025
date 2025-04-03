@@ -9,6 +9,9 @@ public class TitleScreen : MonoBehaviour
     private Button _playButton;
     private Button _closeButton;
 
+    [SerializeField]
+    private bool _loadIntro = true;
+
     private void Awake()
     {
         _ui = GetComponent<UIDocument>().rootVisualElement;
@@ -36,6 +39,13 @@ public class TitleScreen : MonoBehaviour
 
     private void _playButton_clicked()
     {
-        SceneManager.LoadScene(4);
+        if (_loadIntro)
+        {
+            SceneManager.LoadScene(4);
+        }
+        else
+        {
+            SceneManager.LoadScene(1);
+        }
     }
 }

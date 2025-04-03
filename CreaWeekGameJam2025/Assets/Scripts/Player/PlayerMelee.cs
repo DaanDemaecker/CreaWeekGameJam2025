@@ -50,7 +50,7 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
         foreach (var npc in npcsInRange)
         {
 
-            npc.Hit();
+            npc.Hit(1.0f);
 
         }
 
