@@ -17,7 +17,7 @@
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
     border-bottom-left-radius: 20px;
-    background-image: url("project://database/Assets/Textures/frame_screen.png?fileID=21300000&guid=49145b0ea18a3174299e7a29bb17858c&type=3#frame_screen");
+    background-image: none;
     padding-top: 0;
     padding-right: 0;
     padding-bottom: 0;
