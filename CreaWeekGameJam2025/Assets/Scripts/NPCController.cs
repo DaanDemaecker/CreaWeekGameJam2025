@@ -1,12 +1,6 @@
 using System.Collections;
-using System.Security.Cryptography;
-using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem.LowLevel;
-using UnityEngine.Rendering.Universal.Internal;
 using UnityEngine.VFX;
 
 public class NPCController : MonoBehaviour
