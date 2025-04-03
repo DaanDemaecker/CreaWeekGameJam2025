@@ -19,6 +19,9 @@ public class NPCController : MonoBehaviour
     [SerializeField]
     public VisualEffect _bleeding;
 
+    [SerializeField]
+    public AudioSource _gotHitSound;
+
     // Bleeding variables
     float minDelay = 1.5f;
     float maxDelay = 2.0f;
@@ -72,6 +75,10 @@ public class NPCController : MonoBehaviour
 
     IEnumerator ChangeBleeding(bool v)
     {
+        //Screenshake and VFX
+        _bleeding.Play();
+        
+
         float startTime = Time.time;
 
         while(startTime + .5f >= Time.time)
@@ -117,6 +124,20 @@ public class NPCController : MonoBehaviour
         }
 
         
+    }
+
+    public void HitFX()
+    {
+        ScreenShake cameraShake = null;
+        if (Camera.main.TryGetComponent<ScreenShake>(out cameraShake))
+        {
+            cameraShake.StartShake(0.1f);
+        }
+        else
+        {
+            Debug.LogError("Please add a ScreenShake Component to the main camera!");
+        }
+        _gotHitSound.Play();
     }
 
     private void DropBlood()
@@ -189,6 +210,8 @@ public class DeadNPCState : IState
         context.IsDead = true;
 
         onBloodDropped.Invoke(context.transform.position, _bloodSize);
+
+        context._gotHitSound.Play();
 
         //screenshake
         ScreenShake cameraShake = null;

@@ -13,6 +13,8 @@ public class SmallProjectile : MonoBehaviour
         {
             npc.IsBleeding = true;
 
+            npc.HitFX();
+
             Vector3 direction = npc.transform.position - transform.position;
 
             direction.y = 0;
