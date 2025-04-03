@@ -60,6 +60,8 @@ public class Intro : MonoBehaviour
         _ui = GetComponent<UIDocument>().rootVisualElement;
     }
 
+
+
     private void OnEnable()
     {
         _speaker = _ui.Q<Label>("Speaker");
