@@ -1,473 +1,331 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
 
 public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInput.IJumpActions
 {
-    private PlayerInput _controls = null;
+    // Input and component references
+    private PlayerInput _controls;
+    private Rigidbody _rigidbody;
+    private PlayerShooting _playerShooting;
+    private PlayerCamera _playerCamera;
 
-    private Rigidbody _rigidbody = null;
-
+    // Movement variables
+    [SerializeField] private float _maxMoveSpeed = 10f;
+    [SerializeField] private float _acceleration = 30f;
     private Vector3 _moveDirection = Vector3.zero;
     private float _moveMagnitude = 0f;
+    private bool _isDirectionHeld = false;
 
-    private bool _directionHeld = false;
-
-    private PlayerShooting _playerShooting = null;
-
-    private PlayerCamera _camera = null;
-
-    [SerializeField]
-    private float _maxMoveSpeed = 10.0f;
-
-    [SerializeField]
-    private float _accelerationIncrease = 30f;
-
-
-    [SerializeField]
-    private float _jumpDistance = 5;
-
-    [SerializeField]
-    private float _epsilon = 0.1f;
-
-    [SerializeField]
-    private AudioSource _jumpSound;
-    [SerializeField]
-    private AudioSource _moveSound;
-    private float _moveVolume = 0.1f;
-
-    [SerializeField]
-    private AudioSource _deathSound;
-
-    [SerializeField]
-    private VisualEffect _bloodSplash;
-
-    [SerializeField]
-    private VisualEffect _death;
-
-    [SerializeField]
-    private float _jumpDuration = 0.5f;
-
-    [SerializeField]
-    private float _jumpHeight = 0.5f;
-
-    [SerializeField]
-    private AnimationCurve _jumpCurve;
-
-    [SerializeField]
-    private List<Transform> BodyParts = new List<Transform>();
-
+    // Jump variables
+    [SerializeField] private float _jumpDistance = 5f;
+    [SerializeField] private float _jumpDuration = 0.5f;
+    [SerializeField] private float _jumpHeight = 0.5f;
+    [SerializeField] private AnimationCurve _jumpCurve;
+    [SerializeField] private float _bodyPartOffsetStep = 0.55f;
     private bool _isJumping = false;
+    private bool _canJump = true;
 
+    // Collision and environment
+    [SerializeField] private float _collisionRadius = 0.1f; // Previously _epsilon
+    private int _bloodLayerMask;
+    private int _wallLayerMask;
 
-    int _bloodLayerMask = 0;
+    // Audio and visual effects
+    [SerializeField] private AudioSource _jumpSound;
+    [SerializeField] private AudioSource _moveSound;
+    [SerializeField] private float _moveSoundVolumeScale = 0.1f;
+    [SerializeField] private AudioSource _deathSound;
+    [SerializeField] private VisualEffect _bloodSplash;
+    [SerializeField] private VisualEffect _deathEffect;
 
-    bool _canMove = true;
-    bool _canJump = true;
+    // Body parts for animation
+    [SerializeField] private List<Transform> _bodyParts = new List<Transform>();
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        StartCoroutine(SwimUp());
+        // Initialize components and input system
+        _rigidbody = GetComponent<Rigidbody>();
+        _playerShooting = GetComponent<PlayerShooting>();
+        _playerCamera = FindFirstObjectByType<PlayerCamera>();
 
         _controls = new PlayerInput();
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
 
-        _playerShooting = GetComponent<PlayerShooting>();
-
         if (_playerShooting != null)
-        {
             _controls.Shoot.SetCallbacks(_playerShooting);
+
+        if (_playerCamera != null)
+        {
+            _controls.RotateCamera.SetCallbacks(_playerCamera);
+            if (_bodyParts.Count > 0)
+                _playerCamera.Player = transform;
         }
 
-
-        _camera = FindFirstObjectByType<PlayerCamera>();
-        if(_camera != null)
-        {
-            _controls.RotateCamera.SetCallbacks(_camera);
-        
-            if(BodyParts.Count > 0)
-            {
-                _camera.Player = transform;
-            }
-        }
-
-        var taunt = GetComponent<PlayerTaunt>();
-        if (taunt != null)
-        {
+        if (TryGetComponent<PlayerTaunt>(out var taunt))
             _controls.Taunt.SetCallbacks(taunt);
-        }
 
-        var melee = GetComponent<PlayerMelee>();
-        if (melee != null)
-        {
+        if (TryGetComponent<PlayerMelee>(out var melee))
             _controls.Melee.SetCallbacks(melee);
-        }
 
         _controls.Enable();
 
-        _rigidbody = GetComponent<Rigidbody>();
-
+        // Set up layer masks
         _bloodLayerMask = LayerMask.GetMask("Blood");
+        _wallLayerMask = 1 << 16; // Assuming layer 16 is for walls/obstacles
 
+        // Initialize effects
         _bloodSplash.Stop();
-        _death.Stop();
+        _deathEffect.Stop();
+
+        // Start initial animation
+        StartCoroutine(InitialAnimation());
     }
 
-    IEnumerator SwimUp()
+    /// <summary>
+    /// Plays an initial animation for the player, such as emerging from a surface.
+    /// </summary>
+    private IEnumerator InitialAnimation()
     {
-        _canJump = false ;
+        _canJump = false;
+        ResetBodyParts();
 
-        for (int i = 0; i < BodyParts.Count; i++)
-        {
-            BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
-            BodyParts[i].transform.localPosition = Vector3.zero +
-                (i * Vector3.down * .4f);
-        }
-
-
+        float duration = 0.6f;
         float startTime = Time.time;
-        while (!_isJumping && startTime + .6f >= Time.time)
+        while (Time.time < startTime + duration)
         {
-            Vector3 startPos = Vector3.down * .5f;
-            Vector3 endPos = Vector3.zero;
-
-            BodyParts[0].transform.localPosition = Vector3.Lerp(startPos, endPos, (Time.time - startTime) / .6f);
-
-            Quaternion startRot = Quaternion.Euler(-90, 0, 0);
-            Quaternion endRot = Quaternion.Euler(0, 0, 0);
-
-            BodyParts[0].transform.localRotation = Quaternion.Lerp(startRot, endRot, (Time.time - startTime) / .6f);
+            float t = (Time.time - startTime) / duration;
+            _bodyParts[0].localPosition = Vector3.Lerp(Vector3.down * 0.5f, Vector3.zero, t);
+            _bodyParts[0].localRotation = Quaternion.Lerp(Quaternion.Euler(-90, 0, 0), Quaternion.Euler(0, 0, 0), t);
             yield return null;
         }
-
         _canJump = true;
-        yield return null;
     }
+
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            _directionHeld = true;
-
-            var input = context.ReadValue<Vector2>();
-
+            _isDirectionHeld = true;
+            Vector2 input = context.ReadValue<Vector2>();
             _moveMagnitude = input.magnitude;
-
-            var direction = new Vector3(input.x, 0, input.y);
-
-            if (_camera != null)
-            {
-                direction = _camera.RotateToCamera(direction);
-            }
-
-            _moveDirection = direction;
+            Vector3 direction = new Vector3(input.x, 0, input.y).normalized;
+            _moveDirection = _playerCamera != null ? _playerCamera.RotateToCamera(direction) : direction;
         }
-        else if(context.canceled)
+        else if (context.canceled)
         {
-            _directionHeld = false;
+            _isDirectionHeld = false;
         }
     }
 
     void FixedUpdate()
     {
-        if (_rigidbody != null)
+        Vector3 velocity = _rigidbody.linearVelocity;
+
+        // Apply acceleration or deceleration
+        if (_isDirectionHeld)
         {
-            var velocity = _rigidbody.linearVelocity;
-
-            if (_directionHeld)
-            {
-                velocity += _moveDirection * Time.fixedDeltaTime * _accelerationIncrease;
-
-                var magnitude = velocity.magnitude;
-
-                magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
-
-                velocity = velocity.normalized * magnitude;
-            }
-            else
-            {
-                var magnitude = velocity.magnitude;
-
-                magnitude -= _accelerationIncrease * Time.fixedDeltaTime;
-
-                magnitude = Mathf.Clamp(magnitude, 0, _maxMoveSpeed);
-
-                velocity = velocity.normalized * magnitude;
-            }
-
-            if(!_isJumping && !IsMoveDirectionValid(_moveDirection, out Vector3 newVel))
-            {
-               velocity = newVel;
-            }
-
-            _rigidbody.linearVelocity = velocity;
-
-        }
-
-        //rotate the player in the direction they are moving
-        if (_rigidbody.linearVelocity != Vector3.zero)
-        {
-            transform.forward =  Vector3.Lerp(transform.forward, _rigidbody.linearVelocity, Time.deltaTime * 4);
-        }
-
-        //sound
-        if (!_isJumping)
-        {
-            _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
+            velocity += _moveDirection * _acceleration * Time.fixedDeltaTime;
+            velocity = Vector3.ClampMagnitude(velocity, _maxMoveSpeed);
         }
         else
         {
-            _moveSound.volume = 0;
+            float magnitude = velocity.magnitude - _acceleration * Time.fixedDeltaTime;
+            velocity = velocity.normalized * Mathf.Max(magnitude, 0);
         }
 
-    }
-    float dst = .3f;
-    bool IsMoveDirectionValid(Vector3 direction, out Vector3 newDirection)
-    {
-        newDirection = Vector3.zero;
-        Ray ray = new Ray(transform.position + direction * Time.fixedDeltaTime + Vector3.up * 2, Vector3.down);
+        // Adjust velocity if move direction is invalid (e.g., hitting a wall or sliding off blood)
+        if (!_isJumping && !IsMoveDirectionValid(_moveDirection, out Vector3 adjustedVelocity))
+            velocity = adjustedVelocity;
 
-        if (Physics.Raycast(transform.position, direction, dst, 1 << 16))
+        _rigidbody.linearVelocity = velocity;
+
+        // Rotate player to face movement direction
+        if (velocity != Vector3.zero)
+            transform.forward = Vector3.Lerp(transform.forward, velocity, Time.fixedDeltaTime * 4);
+
+        // Update movement sound volume
+        _moveSound.volume = _isJumping ? 0 : velocity.magnitude * _moveSoundVolumeScale;
+    }
+
+    /// <summary>
+    /// Checks if the intended move direction is valid and adjusts velocity if necessary.
+    /// Returns true if the direction keeps the player on a blood pool, false otherwise.
+    /// </summary>
+    private bool IsMoveDirectionValid(Vector3 direction, out Vector3 adjustedVelocity)
+    {
+        adjustedVelocity = Vector3.zero;
+        float stepDistance = 0.3f;
+
+        // Check for wall collision
+        if (Physics.Raycast(transform.position, direction, stepDistance, _wallLayerMask))
             return false;
 
-        if (!Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask) && direction != Vector3.zero)
+        Vector3 nextPosition = transform.position + direction * Time.fixedDeltaTime;
+        Ray ray = new Ray(nextPosition + Vector3.up * 2, Vector3.down);
+
+        // Check if there's a blood pool under the next position
+        bool onBloodPool = Physics.SphereCast(ray, _collisionRadius, 4f, _bloodLayerMask);
+        if (!onBloodPool && direction != Vector3.zero)
         {
-            Collider[] BloodPiles = Physics.OverlapSphere(transform.position, _epsilon * 2, _bloodLayerMask);
-
-            if (BloodPiles.Length >= 1)
+            // Check for nearby blood piles to slide along
+            Collider[] bloodPiles = Physics.OverlapSphere(transform.position, _collisionRadius * 2, _bloodLayerMask);
+            if (bloodPiles.Length > 0)
             {
-                float shortestDist = Mathf.Infinity;
-
-
-                foreach (var Pile in BloodPiles)
+                Collider closestPile = GetClosestCollider(bloodPiles);
+                Vector3 normal = (transform.position - closestPile.transform.position).normalized;
+                if (Vector3.Dot(direction, normal) < -0.11f)
                 {
-                    shortestDist = Mathf.Min(shortestDist, Vector3.Distance(Pile.transform.position, transform.position));
-                }
-                Collider closestPile = BloodPiles.Where(x => Vector3.Distance(x.transform.position, transform.position) == shortestDist).First();
-
-                Vector3 normal =  (closestPile.transform.position - transform.position).normalized;
-
-                if(Vector3.Distance(-normal, direction) > .11f)
-                {
-                    newDirection = (Vector3.Reflect(direction, normal) + direction).normalized;
-
-                    newDirection += normal * .2f;
-                    newDirection.y = 0;
-                    newDirection = newDirection.normalized * _maxMoveSpeed;
-
+                    adjustedVelocity = Vector3.Reflect(direction, normal).normalized * _maxMoveSpeed;
                     return false;
-                } 
-                
+                }
             }
         }
-
-
-        bool result = Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask);
-        return result;
+        return onBloodPool;
     }
 
-    [SerializeField]
-    float _offsetStep = .55f;
-    IEnumerator Jump(Vector3 nextBloodpool)
+    private Collider GetClosestCollider(Collider[] colliders)
     {
-        //animations and sound
-        _bloodSplash.SetBool("HeavySplash", false);
-        _bloodSplash.Play();
-        
-        // start jumping
+        float minDistance = Mathf.Infinity;
+        Collider closest = null;
+        foreach (var collider in colliders)
+        {
+            float distance = Vector3.Distance(transform.position, collider.transform.position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closest = collider;
+            }
+        }
+        return closest;
+    }
+
+    /// <summary>
+    /// Handles the player's jump to a target blood pool position.
+    /// </summary>
+    private IEnumerator Jump(Vector3 targetPosition)
+    {
         _isJumping = true;
         _canJump = false;
-        //_canMove = false;
 
-        Vector3 _jumpStart = transform.position;
+        // Takeoff effects
+        _bloodSplash.SetBool("HeavySplash", false);
+        _bloodSplash.Play();
+        _jumpSound.Play();
 
-        bool animate = true;
-        bool doFX = true;
-
-        // actual jumping
+        Vector3 startPosition = transform.position;
         float startTime = Time.time;
-        while(animate && startTime + _jumpDuration + .4f >= Time.time)
+
+        while (Time.time < startTime + _jumpDuration)
         {
-            float lerpFactor = (Time.time - startTime) / _jumpDuration;
+            float t = (Time.time - startTime) / _jumpDuration;
+            Vector3 position = Vector3.Lerp(startPosition, targetPosition, t);
+            position.y += _jumpCurve.Evaluate(t) * _jumpHeight;
+            transform.position = position;
 
-            if (lerpFactor >= 1 && lerpFactor < 1.1f)
+            // Animate body parts with a trailing effect
+            for (int i = 0; i < _bodyParts.Count; i++)
             {
-                _isJumping = false;
-                Ray ray = new Ray(transform.position + Vector3.up * 2, Vector3.down);
-                if (!Physics.SphereCast(ray, _epsilon, 50, _bloodLayerMask))
-                {
-                    for (int i = 0; i < BodyParts.Count; i++)
-                    {
-                        BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
-                        BodyParts[i].transform.localPosition = Vector3.zero +
-                            (i * Vector3.down * .4f);
-                    }
-
-                    //Screenshake and VFX
-                    ScreenShake cameraShake = null;
-                    if (Camera.main.TryGetComponent<ScreenShake>(out cameraShake))
-                    {
-                        cameraShake.StartShake(0.2f);
-                    }
-                    else
-                    {
-                        Debug.LogError("Please add a ScreenShake Component to the main camera!");
-                    }
-                    _deathSound.Play();
-                    _death.Play();
-
-                    yield return new WaitForEndOfFrame();
-                    transform.position = _jumpStart;
-                    animate = false;
-                }
-
-                //animations and sound
-                if (doFX)
-                {
-                    doFX = false;
-                    _bloodSplash.SetBool("HeavySplash", true);
-                    _bloodSplash.Stop();
-                    _bloodSplash.Reinit();
-                    _bloodSplash.Play();
-                    _jumpSound.pitch = Random.value + 0.5f;
-                    _jumpSound.Play();
-                }
-
-            }
-
-            if(lerpFactor >= 1.1f)
-            {
-                _canJump = false;
-                animate = false;
-            }
-
-            for (int i = 0; i < BodyParts.Count; i++)
-            {
-                float offset = i * _offsetStep;
-                
-                Vector3 newPos = Vector3.Lerp(_jumpStart,transform.position, lerpFactor - offset);
-                float jumpHeight = _jumpCurve.Evaluate(lerpFactor - offset) * _jumpHeight;
-                newPos.y = _jumpStart.y + jumpHeight;
-
-                float velOffset = _rigidbody.linearVelocity.magnitude * .03f * i;
-                BodyParts[i].transform.localPosition = new Vector3(0,newPos.y,  -velOffset);
-
-                Vector3 targetDir = new Vector3(0, _jumpCurve.Evaluate(lerpFactor - offset), lerpFactor - offset) -
-                    new Vector3(0, _jumpCurve.Evaluate(lerpFactor - .1f - offset), lerpFactor - .1f - offset);
-                Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
-                BodyParts[i].transform.localRotation = targetRotation;
-
+                float offset = i * _bodyPartOffsetStep;
+                float partT = Mathf.Clamp01(t - offset);
+                Vector3 partPos = Vector3.Lerp(startPosition, targetPosition, partT);
+                partPos.y += _jumpCurve.Evaluate(partT) * _jumpHeight;
+                _bodyParts[i].position = partPos;
             }
             yield return null;
-
         }
 
-        for (int i = 0; i < BodyParts.Count; i++)
+        // Ensure final position
+        transform.position = targetPosition;
+
+        // Check landing on blood pool
+        Ray ray = new Ray(transform.position + Vector3.up * 2, Vector3.down);
+        if (!Physics.SphereCast(ray, _collisionRadius, 4f, _bloodLayerMask))
         {
-            BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
-            BodyParts[i].transform.localPosition = Vector3.zero +
-                (i * Vector3.down * .4f);
+            // Death sequence
+            ResetBodyParts();
+            if (Camera.main.TryGetComponent<ScreenShake>(out var cameraShake))
+                cameraShake.StartShake(0.2f);
+            _deathSound.Play();
+            _deathEffect.Play();
+            transform.position = startPosition;
+        }
+        else
+        {
+            // Landing effects
+            _bloodSplash.SetBool("HeavySplash", true);
+            _bloodSplash.Stop();
+            _bloodSplash.Play();
+            _jumpSound.pitch = Random.Range(0.5f, 1.5f);
+            _jumpSound.Play();
         }
 
+        // Reset body parts with animation
+        yield return StartCoroutine(ResetBodyPartsSmoothly(0.6f));
+        _isJumping = false;
         _canJump = true;
+    }
 
-        startTime = Time.time;
-        while (!_isJumping && startTime + .6f >= Time.time)
+    private void ResetBodyParts()
+    {
+        for (int i = 0; i < _bodyParts.Count; i++)
         {
-            Vector3 startPos = Vector3.down * .5f;
-            Vector3 endPos = Vector3.zero;
+            _bodyParts[i].localPosition = Vector3.down * 0.4f * i;
+            _bodyParts[i].localRotation = Quaternion.Euler(Vector3.zero);
+        }
+    }
 
-            BodyParts[0].transform.localPosition = Vector3.Lerp(startPos, endPos, (Time.time - startTime) / .6f);
+    private IEnumerator ResetBodyPartsSmoothly(float duration)
+    {
+        float startTime = Time.time;
+        Vector3[] startPositions = _bodyParts.Select(bp => bp.localPosition).ToArray();
+        Quaternion[] startRotations = _bodyParts.Select(bp => bp.localRotation).ToArray();
 
-            Quaternion startRot = Quaternion.Euler(-90, 0, 0);
-            Quaternion endRot = Quaternion.Euler(0, 0, 0);
-
-            BodyParts[0].transform.localRotation = Quaternion.Lerp(startRot, endRot, (Time.time - startTime) / .6f);
+        while (Time.time < startTime + duration)
+        {
+            float t = (Time.time - startTime) / duration;
+            for (int i = 0; i < _bodyParts.Count; i++)
+            {
+                _bodyParts[i].localPosition = Vector3.Lerp(startPositions[i], Vector3.down * 0.4f * i, t);
+                _bodyParts[i].localRotation = Quaternion.Lerp(startRotations[i], Quaternion.Euler(Vector3.zero), t);
+            }
             yield return null;
         }
+        ResetBodyParts();
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if(!_canJump || !context.started)
-        {
+        if (!_canJump || !context.started)
             return;
-        }
 
-        // Check for nearby bloodpool, if one is found, start jump
-        var nextBloodPool = FindBloodPoolLocation();
-
-        if (nextBloodPool != Vector3.zero)
-        {
-            //StartCoroutine(DisableMovement(_jumpDuration));
-            StartCoroutine(Jump(nextBloodPool));
-            
-        }
+        Vector3 targetBloodPool = FindBloodPoolLocation();
+        if (targetBloodPool != Vector3.zero)
+            StartCoroutine(Jump(targetBloodPool));
     }
 
+    /// <summary>
+    /// Finds the next valid blood pool position in the forward direction.
+    /// </summary>
     private Vector3 FindBloodPoolLocation()
     {
-        // This function will check if a bloodpool is in the direction the player is looking
-        // Before registering a bloodpool, we need to find a floor piece first
+        int floorLayerMask = LayerMask.GetMask("Floor"); // Define in Unity editor
+        Vector3 direction = transform.forward;
 
-        int bloodDistance = 0;
-
-        bool floorFound = false;
-
-        bool bloodFound = false;
-
-        for (int i = 0; i < (int)(_jumpDistance / _epsilon); i+=2)
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, _jumpDistance, floorLayerMask))
         {
-            Ray ray = new Ray(transform.position + transform.forward * i * _epsilon*2 + Vector3.up * 2, Vector3.down);
-
-            bool result = Physics.SphereCast(ray, _epsilon/2, 50, _bloodLayerMask);
-
-            if(!floorFound && !result)
-            {
-                floorFound = true;
-                continue;
-            }
-
-            if(floorFound && result)
-            {
-                bloodDistance = i;
-                bloodFound = true;
-                break;
-            }
+            Vector3 hitPoint = hit.point;
+            if (Physics.CheckSphere(hitPoint, _collisionRadius, _bloodLayerMask))
+                return hitPoint;
         }
-
-        if(!floorFound)
-        {
-            bloodDistance = (int)(_jumpDistance / _epsilon);
-        }
-        else if(!bloodFound)
-        {
-            bloodDistance = (int)(_jumpDistance / _epsilon);
-        }
-
-        if (bloodDistance > 0)
-        {
-            return transform.position + transform.forward * bloodDistance * _epsilon * 2;
-        }
-
-
-        return Vector3.zero;
+        return Vector3.zero; // No valid jump target found
     }
 
-    public IEnumerator DisableMovement(float duration)
+    private void OnDisable()
     {
-        
-        _moveDirection = Vector3.zero;
-
-        if(_rigidbody)
-        {
-            _rigidbody.linearVelocity = Vector3.zero;
-        }
-
-        yield return new WaitForSeconds(duration);
+        _controls?.Disable();
+        StopAllCoroutines();
     }
 }
