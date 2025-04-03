@@ -20,6 +20,9 @@ public class NPCController : MonoBehaviour
     public VisualEffect _bleeding;
 
     [SerializeField]
+    public VisualEffect _bloodSplatter;
+
+    [SerializeField]
     public AudioSource _gotHitSound;
 
     // Bleeding variables
@@ -70,6 +73,7 @@ public class NPCController : MonoBehaviour
     {
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
 
+        _bleeding.Stop();
         _bleeding.Stop();
     }
 
@@ -138,6 +142,7 @@ public class NPCController : MonoBehaviour
             Debug.LogError("Please add a ScreenShake Component to the main camera!");
         }
         _gotHitSound.Play();
+        _bloodSplatter.Play();
     }
 
     private void DropBlood()
