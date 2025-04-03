@@ -14,7 +14,7 @@ public class NPCController : MonoBehaviour
     [HideInInspector] public StateMachine StateMachine;
     [SerializeField] private Animator animator;
 
-    [SerializeField] public UnityEvent<bool> OnDeath;
+    [SerializeField] public UnityEvent OnDeath;
 
     [SerializeField]
     public VisualEffect _bleeding;
@@ -210,7 +210,7 @@ public class DeadNPCState : IState
     {
         context.IsDead = true;
 
-        context.OnDeath.Invoke(true);
+        context.OnDeath.Invoke();
 
         onEnemyKilled.Invoke();
 
