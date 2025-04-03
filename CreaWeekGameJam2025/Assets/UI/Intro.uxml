@@ -9,5 +9,7 @@
                 <engine:Label text="You aren&apos;t supposed to be able to see this text...&#10;Here&apos;s some more of it&#10;another line for the fans&#10;yeah" enabled="true" enable-rich-text="true" name="Text" style="font-size: 32px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; -unity-text-align: upper-left; display: flex; -unity-font-definition: url(&quot;project://database/Assets/Fonts/YuseiMagic-Regular.ttf?fileID=12800000&amp;guid=594d30277f2b63d44850719d4fc4935a&amp;type=3#YuseiMagic-Regular&quot;);" />
             </engine:VisualElement>
         </engine:VisualElement>
+        <engine:VisualElement name="VisualElement" style="flex-grow: 1; position: absolute; background-image: url(&quot;project://database/Assets/Textures/IMG_0811.png?fileID=2800000&amp;guid=68eeec4a52b680c47ae8790b87070b46&amp;type=3#IMG_0811&quot;); height: 100px; width: 180px; top: 907px; left: 1649px;" />
+        <engine:VisualElement name="VisualElement" style="flex-grow: 1; position: absolute; background-image: url(&quot;project://database/Assets/VFX/VFX_Assets/T_Circle.png?fileID=2800000&amp;guid=07882399585d0374cb3c3a2376ebc1c8&amp;type=3#T_Circle&quot;); height: 32px; width: 32px; top: 970px; left: 1722px;" />
     </engine:VisualElement>
 </engine:UXML>
