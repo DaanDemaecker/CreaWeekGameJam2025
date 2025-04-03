@@ -16,6 +16,9 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
     [SerializeField]
     private VisualEffect _melee;
 
+    [SerializeField]
+    private AudioSource _attackSound;
+
     public void OnMelee(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         if (context.performed && _canAttack)
@@ -52,6 +55,7 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
 
         //animation and SFX
         _melee.Play();
+        _attackSound.Play();
 
         StartCoroutine(MeleeCooldown(_meleeCooldown));
     }

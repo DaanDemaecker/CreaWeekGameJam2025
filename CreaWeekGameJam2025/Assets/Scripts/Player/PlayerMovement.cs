@@ -39,6 +39,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private float _moveVolume = 0.1f;
 
     [SerializeField]
+    private AudioSource _deathSound;
+
+    [SerializeField]
     private VisualEffect _bloodSplash;
 
     [SerializeField]
@@ -183,7 +186,14 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         }
 
         //sound
-        _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
+        if (!_isJumping)
+        {
+            _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
+        }
+        else
+        {
+            _moveSound.volume = 0;
+        }
 
     }
     float dst = .3f;
@@ -278,6 +288,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                     {
                         Debug.LogError("Please add a ScreenShake Component to the main camera!");
                     }
+                    _deathSound.Play();
                     _death.Play();
 
                     yield return new WaitForEndOfFrame();
@@ -290,7 +301,10 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 {
                     doFX = false;
                     _bloodSplash.SetBool("HeavySplash", true);
+                    _bloodSplash.Stop();
+                    _bloodSplash.Reinit();
                     _bloodSplash.Play();
+                    _jumpSound.pitch = Random.value + 0.5f;
                     _jumpSound.Play();
                 }
 

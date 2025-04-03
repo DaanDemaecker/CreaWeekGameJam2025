@@ -24,6 +24,9 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
     [SerializeField]
     private NPCController _currentTarget = null;
 
+    [SerializeField]
+    private AudioSource _attackSound;
+
     public void OnShootSmall(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         if (_canShoot && context.started)
@@ -34,7 +37,9 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 
     private void Shoot(GameObject prefab)
     {
-       var gameObject = Instantiate(prefab, transform.position, Quaternion.identity);
+       _attackSound.Play();
+        
+        var gameObject = Instantiate(prefab, transform.position, Quaternion.identity);
 
         if (gameObject != null)
         {
