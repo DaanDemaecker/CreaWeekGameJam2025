@@ -260,6 +260,7 @@ public class EnterBuildingState : IState
     }   
     public void OnEnter()
     {
+        context._bleeding.Stop();
         context.IsBleeding = false;
     }
 
