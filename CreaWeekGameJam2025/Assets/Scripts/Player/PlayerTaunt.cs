@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.VFX;
 
 public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
@@ -67,11 +68,13 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
         _taunt.Play();
 
         _tauntSound.Play();
+
+        StartCoroutine(TauntCooldown(_tauntCooldown));
+
     }
 
     NPCController GetClosestNpc()
     {
-        StartCoroutine(TauntCooldown(_tauntCooldown));
 
         var npcs = FindObjectsByType<NPCController>(FindObjectsSortMode.None);
 
@@ -100,11 +103,18 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
 
         return npcs[closestNpc];
     }
-
+    public UnityEvent<float> UpdateTauntUI;
     private IEnumerator TauntCooldown(float duration)
     {
         _canTaunt = false;
-        yield return new WaitForSeconds(duration);
+        UpdateTauntUI.Invoke(0);
+        float startTime = Time.time;
+        while(startTime + duration >= Time.time)
+        {
+            UpdateTauntUI.Invoke((Time.time - startTime) / duration);
+            yield return null;
+        }
+        UpdateTauntUI.Invoke(1);
         _canTaunt = true;
     }
 }

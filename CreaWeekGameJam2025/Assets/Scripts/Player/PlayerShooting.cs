@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 {
@@ -56,11 +57,18 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 
         StartCoroutine(DisableShootRoutine(_shootCooldown));
     }
-
+    public UnityEvent<float> UpdateUI;
     private IEnumerator DisableShootRoutine(float duration)
     {
         _canShoot = false;
-        yield return new WaitForSeconds(duration);
+        UpdateUI.Invoke(0);
+        float startTime = Time.time;
+        while (startTime + duration >= Time.time)
+        {
+            UpdateUI.Invoke((Time.time - startTime) / duration);
+            yield return null;
+        }
+        UpdateUI.Invoke(1); 
         _canShoot = true;
     }
 

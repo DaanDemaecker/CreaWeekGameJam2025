@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.VFX;
 
 public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
@@ -59,11 +60,18 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
 
         StartCoroutine(MeleeCooldown(_meleeCooldown));
     }
-
+    public UnityEvent<float> UpdateUI;
     private IEnumerator MeleeCooldown(float duration)
     {
         _canAttack = false;
-        yield return new WaitForSeconds(duration);
+        UpdateUI.Invoke(0);
+        float startTime = Time.time;
+        while (startTime + duration >= Time.time)
+        {
+            UpdateUI.Invoke((Time.time - startTime) / duration);
+            yield return null;
+        }
+        UpdateUI.Invoke(1);
         _canAttack = true;
     }
 }
