@@ -34,13 +34,13 @@ public class PlayerBloodTracker : MonoBehaviour
 
     private void OnEnable()
     {
-        SmallProjectile.onEnemyHit += EnemyHit;
+        NPCController.onEnemyHit += EnemyHit;
         DeadNPCState.onEnemyKilled += EnemyKilled;
     }
 
     private void OnDisable()
     {
-        SmallProjectile.onEnemyHit -= EnemyHit;
+        NPCController.onEnemyHit -= EnemyHit;
         DeadNPCState.onEnemyKilled -= EnemyKilled;
     }
 

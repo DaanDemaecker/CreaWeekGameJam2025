@@ -69,6 +69,7 @@ MonoBehaviour:
   _bleeding: {fileID: 2228936377019777271}
   _bloodSplatter: {fileID: 6854650659852059160}
   _gotHitSound: {fileID: 6621304060493057388}
+  _health: 4
 --- !u!136 &5546009369829245865
 CapsuleCollider:
   m_ObjectHideFlags: 0

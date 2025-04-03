@@ -11,6 +11,9 @@ using UnityEngine.VFX;
 
 public class NPCController : MonoBehaviour
 {
+    public delegate void EnemyHit();
+    public static event EnemyHit onEnemyHit;
+
     [HideInInspector] public StateMachine StateMachine;
     [SerializeField] private Animator animator;
 
@@ -24,6 +27,9 @@ public class NPCController : MonoBehaviour
 
     [SerializeField]
     public AudioSource _gotHitSound;
+
+    [SerializeField]
+    private int _health = 2;
 
     // Bleeding variables
     float minDelay = 1.5f;
@@ -128,6 +134,23 @@ public class NPCController : MonoBehaviour
         }
 
         
+    }
+
+    public void Hit()
+    {
+        HitFX();
+
+        IsBleeding = true;
+
+        onEnemyHit.Invoke();
+
+        _health--;
+
+        if(_health <= 0)
+        {
+            IsDead = true;
+            StateMachine.MoveToState(new DeadNPCState(transform.position, this));
+        }
     }
 
     public void HitFX()
