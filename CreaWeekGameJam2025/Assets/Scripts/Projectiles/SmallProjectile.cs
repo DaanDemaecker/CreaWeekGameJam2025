@@ -15,7 +15,7 @@ public class SmallProjectile : MonoBehaviour
 
             npc.StateMachine.MoveToState(new WanderingState(direction, npc));
 
-            npc.Hit();
+            npc.Hit(0.25f);
 
             Destroy(gameObject);
         }
