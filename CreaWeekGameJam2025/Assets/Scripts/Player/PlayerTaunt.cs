@@ -49,7 +49,7 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
         {
             if (!npc.IsBleeding)
             {
-                npc.StateMachine.MoveToState(new ChasingState(transform, npc));
+                npc.StateMachine.MoveToState(new ChasingState(Vector3.zero,transform, npc));
             }
         }
 
@@ -58,7 +58,7 @@ public class PlayerTaunt : MonoBehaviour, PlayerInput.ITauntActions
             var npc = GetClosestNpc();
             if (npc != null)
             {
-                npc.StateMachine.MoveToState(new ChasingState(transform, npc));
+                npc.StateMachine.MoveToState(new ChasingState(Vector3.zero, transform, npc));
             }
         }
 

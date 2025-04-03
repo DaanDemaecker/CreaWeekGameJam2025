@@ -265,7 +265,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         {
             float lerpFactor = (Time.time - startTime) / _jumpDuration;
 
-            if (lerpFactor >= 1)
+            if (lerpFactor >= 1 && lerpFactor < 1.1f)
             {
                 _isJumping = false;
                 Ray ray = new Ray(transform.position + Vector3.up * 2, Vector3.down);
