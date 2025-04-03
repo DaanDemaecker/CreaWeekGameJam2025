@@ -26,7 +26,7 @@ public class Intro : MonoBehaviour
         "Their sacrifice will summon...",
         "the great spirit of the Soup!",
         "But something went wrong…",
-        "Instead of their sacred deity… they got you. A demon. Summoned by mistake. Trapped in a world of crunchy, leafy fools!",
+        "Instead of their sacred deity… they got you. A demon. Summoned by mistake. \nTrapped in a world of crunchy, leafy fools!",
         "This is NOT vegan!!",
         "Now, there’s only one thing left to do… Take revenge.",
         "Make ‘em stew in their mistakes."
