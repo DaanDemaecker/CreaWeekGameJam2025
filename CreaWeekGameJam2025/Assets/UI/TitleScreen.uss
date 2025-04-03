@@ -12,11 +12,16 @@
 }
 
 .frame {
-    background-color: rgb(255, 255, 255);
+    background-color: rgba(255, 255, 255, 0);
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
     border-bottom-left-radius: 20px;
+    background-image: url("project://database/Assets/Textures/frame_screen.png?fileID=21300000&guid=49145b0ea18a3174299e7a29bb17858c&type=3#frame_screen");
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
 }
 
 .unity-button {
@@ -42,6 +47,10 @@
     transition-timing-function: ease-out-bounce;
     transition-delay: 0s;
     transition-duration: 0.1s;
+    border-left-color: rgb(224, 224, 224);
+    border-right-color: rgb(224, 224, 224);
+    border-top-color: rgb(224, 224, 224);
+    border-bottom-color: rgb(224, 224, 224);
 }
 
 .unity-button:hover {
