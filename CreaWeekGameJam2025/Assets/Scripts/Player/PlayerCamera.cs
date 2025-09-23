@@ -29,12 +29,12 @@ public class PlayerCamera : MonoBehaviour, PlayerInput.IRotateCameraActions
     private float _lerpMult = 3;
 
     private float _angle = 0f;
-    private float _angelInput = 0f;
+    private float _angelInput = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        _angle = transform.rotation.eulerAngles.y;
         _yPos = transform.position.y;
     }
 

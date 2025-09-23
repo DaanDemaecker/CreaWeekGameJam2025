@@ -87,8 +87,7 @@ public class ScreenSpaceOutlines : ScriptableRendererFeature {
 
             normalsMaterial = new Material(Shader.Find("Hidden/ViewSpaceNormals"));
         }
-
-        public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
+public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
             // Normals
             RenderTextureDescriptor textureDescriptor = renderingData.cameraData.cameraTargetDescriptor;
             textureDescriptor.colorFormat = settings.colorFormat;

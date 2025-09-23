@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 {
@@ -24,6 +25,9 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
     [SerializeField]
     private NPCController _currentTarget = null;
 
+    [SerializeField]
+    private AudioSource _attackSound;
+
     public void OnShootSmall(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         if (_canShoot && context.started)
@@ -34,7 +38,9 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 
     private void Shoot(GameObject prefab)
     {
-       var gameObject = Instantiate(prefab, transform.position, Quaternion.identity);
+       _attackSound.Play();
+        
+        var gameObject = Instantiate(prefab, transform.position, Quaternion.identity);
 
         if (gameObject != null)
         {
@@ -51,11 +57,18 @@ public class PlayerShooting : MonoBehaviour, PlayerInput.IShootActions
 
         StartCoroutine(DisableShootRoutine(_shootCooldown));
     }
-
+    public UnityEvent<float> UpdateUI;
     private IEnumerator DisableShootRoutine(float duration)
     {
         _canShoot = false;
-        yield return new WaitForSeconds(duration);
+        UpdateUI.Invoke(0);
+        float startTime = Time.time;
+        while (startTime + duration >= Time.time)
+        {
+            UpdateUI.Invoke((Time.time - startTime) / duration);
+            yield return null;
+        }
+        UpdateUI.Invoke(1); 
         _canShoot = true;
     }
 

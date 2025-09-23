@@ -1,23 +1,29 @@
 using System.Collections;
-using System.Security.Cryptography;
-using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem.LowLevel;
-using UnityEngine.Rendering.Universal.Internal;
 using UnityEngine.VFX;
 
 public class NPCController : MonoBehaviour
 {
+    public delegate void EnemyHit();
+    public static event EnemyHit onEnemyHit;
+
     [HideInInspector] public StateMachine StateMachine;
     [SerializeField] private Animator animator;
 
-    [SerializeField] public UnityEvent<bool> OnDeath;
+    [SerializeField] public UnityEvent OnDeath;
 
     [SerializeField]
     public VisualEffect _bleeding;
+
+    [SerializeField]
+    public VisualEffect _bloodSplatter;
+
+    [SerializeField]
+    public AudioSource _gotHitSound;
+
+    [SerializeField]
+    private float _health = 2;
 
     // Bleeding variables
     float minDelay = 1.5f;
@@ -46,7 +52,19 @@ public class NPCController : MonoBehaviour
             if (_isBleeding == value) return;
 
             _isBleeding = value;
+
+            if (value)
+            {
+                _bleeding.Play();
+            }
+            else
+            {
+                _bleeding.Stop();
+            }
+
             StartCoroutine(ChangeBleeding(value));
+
+            
         }
     }
     public delegate void SmallBloodDropped(Vector3 pos, float size);
@@ -56,11 +74,14 @@ public class NPCController : MonoBehaviour
         StateMachine = new StateMachine(new WanderingState(Vector3.zero,this));
 
         _bleeding.Stop();
+        _bleeding.Stop();
     }
 
     IEnumerator ChangeBleeding(bool v)
     {
+        //Screenshake and VFX
         _bleeding.Play();
+        
 
         float startTime = Time.time;
 
@@ -69,9 +90,6 @@ public class NPCController : MonoBehaviour
             animator.SetFloat("Bleeding", Mathf.Lerp(v ? 0f : 1f, v ? 1f : 0f, (Time.time - startTime) / .5f));
             yield return null;
         }
-
-        
-
     }
 
     // Update is called once per frame
@@ -110,6 +128,38 @@ public class NPCController : MonoBehaviour
         }
 
         
+    }
+
+    public void Hit(float damage)
+    {
+        HitFX();
+
+        IsBleeding = true;
+
+        onEnemyHit.Invoke();
+
+        _health -= damage;
+
+        if(_health <= 0)
+        {
+            IsDead = true;
+            StateMachine.MoveToState(new DeadNPCState(transform.position, this));
+        }
+    }
+
+    public void HitFX()
+    {
+        ScreenShake cameraShake = null;
+        if (Camera.main.TryGetComponent<ScreenShake>(out cameraShake))
+        {
+            cameraShake.StartShake(0.1f);
+        }
+        else
+        {
+            Debug.LogError("Please add a ScreenShake Component to the main camera!");
+        }
+        _gotHitSound.Play();
+        _bloodSplatter.Play();
     }
 
     private void DropBlood()
@@ -175,13 +225,15 @@ public class DeadNPCState : IState
     }
     public void OnEnter()
     {
-        context.OnDeath.Invoke(true);
+        context.IsDead = true;
+
+        context.OnDeath.Invoke();
 
         onEnemyKilled.Invoke();
 
-        context.IsDead = true;
-
         onBloodDropped.Invoke(context.transform.position, _bloodSize);
+
+        context._gotHitSound.Play();
 
         //screenshake
         ScreenShake cameraShake = null;
@@ -227,7 +279,7 @@ public class EnterBuildingState : IState
 {
     NPCController context;
 
-    float speed = .6f;
+    float speed = 2f;
     float dst = 3;
 
     float hideLength = 5f;
@@ -253,7 +305,8 @@ public class EnterBuildingState : IState
     }   
     public void OnEnter()
     {
-        
+        context._bleeding.Stop();
+        context.IsBleeding = false;
     }
 
     public void OnExit()
@@ -268,8 +321,8 @@ public class EnterBuildingState : IState
         {
             float normalizedTime = time / speed;
 
-            Vector3 pos1 = startPos + Vector3.Lerp(Vector3.zero, dir1, normalizedTime);
-            Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime);
+            Vector3 pos1 = startPos + Vector3.Lerp(Vector3.zero, dir1, normalizedTime/ dir2.magnitude);
+            Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime / dir2.magnitude);
 
             Vector3 targetPosition = Vector3.Lerp(pos1, pos2, normalizedTime);
 
@@ -310,8 +363,6 @@ public class WanderingState : IState
 
         startPos = context.transform.position;
 
-
-
         if (startForward != Vector3.zero)
         {
             dir1 = startForward.normalized * dst;
@@ -327,14 +378,19 @@ public class WanderingState : IState
                 dir1.Normalize();
                 dir1 *= dst;
 
-            } while (Physics.Raycast(startPos + Vector3.up, dir1, dst, 1 << 16));
+            } while (!IsValidPosition(startPos + dir1 + dir1) || Physics.Raycast(startPos + Vector3.up, dir1, dst, 1 << 16));
 
         }
 
         do
         {
-            dir2 = Quaternion.Euler(0, Random.Range(-145, 145), 0) * dir1;
-        } while (Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
+            dir2 = Quaternion.Euler(0, Random.Range(-180, 180), 0) * dir1;
+        } while (!IsValidPosition(startPos + dir1 + dir2) || Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
+    }
+
+    bool IsValidPosition(Vector3 pos)
+    {
+        return Physics.CheckSphere(pos, 1f, 1 << 18);
     }
 
     public void OnEnter()
@@ -384,35 +440,70 @@ public class WanderingState : IState
         Collider[] Doors = Physics.OverlapSphere(startPos + dir1 + dir2, dst * 2, 1 << 17);
 
         //if(Doors.Length >= 1)
-        if(Doors.Length > 0 && Random.Range(0,1f) > .8f)
+        if(Doors.Length > 0 && (context.IsBleeding || Random.Range(0,1f) > .8f))
         {
             door = Doors[(int)Random.Range(0, Doors.Length)].transform.position;
             return true;
         } 
 
         return false;
-
-
     }
 }
 
 public class ChasingState : IState
 {
 
-    NPCController _context;
+    NPCController context;
 
     Transform _player;
 
-    float _chasingDuration = 2.5f;
-    float _timer = 0;
-    float _speed = 2.0f;
+    float time = 0;
 
-    public ChasingState(Transform player, NPCController ctx)
+    float speed = 2f;
+    float dst = 3;
+
+    Vector3 startPos;
+
+    Vector3 dir1;
+    Vector3 dir2;
+
+    public ChasingState(Vector3 startForward, Transform player, NPCController ctx)
     {
-        _context = ctx;
         _player = player;
+        context = ctx;
+
+        float time = 0;
+
+        startPos = context.transform.position;
+
+        if (startForward != Vector3.zero)
+        {
+            dir1 = startForward;
+        } else
+        {
+            dir1 = (_player.position - context.transform.position).normalized * dst;
+        }
+        
+
+        do
+        {
+            dir2 = Quaternion.Euler(0, Random.Range(-180, 180), 0) * dir1;
+        } 
+        while (!IsFacingTowardsPlayer() || 
+        !IsValidPosition(startPos + dir1 + dir2) || 
+        Physics.Raycast(startPos + dir1 + Vector3.up, dir2, dst * 2, 1 << 16));
     }
 
+    bool IsValidPosition(Vector3 pos)
+    {
+        return Physics.CheckSphere(pos, 1f, 1 << 18);
+    }
+
+    bool IsFacingTowardsPlayer()
+    {
+        float dot = Vector3.Dot((_player.position - context.transform.position).normalized, (dir1 + dir2).normalized);
+        return dot > 0.8f;
+    }
     public void OnEnter()
     {
         
@@ -423,16 +514,38 @@ public class ChasingState : IState
     }
     public void OnUpdate()
     {
-        var direction = _player.transform.position - _context.transform.position;
-        direction.y = 0;
+        time += Time.deltaTime;
 
-        _context.transform.position = _context.transform.position + direction.normalized * _speed * Time.deltaTime;
-
-        _timer += Time.deltaTime;
-
-        if (_timer > _chasingDuration)
+        if (time <= speed)
         {
-            _context.StateMachine.MoveToState(new WanderingState(Vector3.zero, _context));
+            float normalizedTime = time / speed;
+
+            Vector3 pos1 = startPos + Vector3.Lerp(Vector3.zero, dir1, normalizedTime);
+            Vector3 pos2 = startPos + dir1 + Vector3.Lerp(Vector3.zero, dir2, normalizedTime);
+
+            Vector3 targetPosition = Vector3.Lerp(pos1, pos2, normalizedTime);
+
+            Vector3 direction = targetPosition - context.transform.position;
+            
+            context.transform.forward = direction;
+            context.transform.position = targetPosition;
+
         }
+        else
+        {
+            if (Vector3.Distance(context.transform.position, _player.position) <= 6)
+            {
+                context.StateMachine.MoveToState(new WanderingState(dir2, context));
+            }
+            else
+            {
+                context.StateMachine.MoveToState(new ChasingState(dir2,_player, context));
+            }
+        }
+
+        //if (time > _chasingDuration)
+        //{
+        //    context.StateMachine.MoveToState(new WanderingState(Vector3.zero, context));
+        //}
     }
 }

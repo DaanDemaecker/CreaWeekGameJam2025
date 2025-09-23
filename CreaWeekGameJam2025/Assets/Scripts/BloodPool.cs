@@ -6,18 +6,13 @@ public class BloodPool : MonoBehaviour
     [SerializeField]
     private bool _ignoreGrow = false;
     
-    private float _growSpeed = 1.5f;
-
-    private Vector3 _baseSize;
+    private float _growSpeed = 1f;
     
-    void Start()
+    void OnEnable()
     {
-        _baseSize = this.transform.localScale;
         
         if (!_ignoreGrow)
         {
-            this.transform.localScale = Vector3.zero;
-
             StartCoroutine(ScaleToSize());
         }
         
@@ -25,9 +20,9 @@ public class BloodPool : MonoBehaviour
 
     private IEnumerator ScaleToSize()
     {
-        while (transform.localScale.magnitude < _baseSize.magnitude)
+        while (transform.GetChild(0).localScale.x < 1)
         {
-            this.transform.localScale += Vector3.one * _growSpeed * Time.deltaTime;
+            this.transform.GetChild(0).localScale += Vector3.one * _growSpeed * Time.deltaTime;
             yield return null;
         }
 

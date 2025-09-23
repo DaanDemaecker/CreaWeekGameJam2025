@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.VFX;
 
 public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
@@ -15,6 +16,9 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
 
     [SerializeField]
     private VisualEffect _melee;
+
+    [SerializeField]
+    private AudioSource _attackSound;
 
     public void OnMelee(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
@@ -46,20 +50,28 @@ public class PlayerMelee : MonoBehaviour, PlayerInput.IMeleeActions
         foreach (var npc in npcsInRange)
         {
 
-            npc.StateMachine.MoveToState(new DeadNPCState(transform.position, npc));
+            npc.Hit(1.0f);
 
         }
 
         //animation and SFX
         _melee.Play();
+        _attackSound.Play();
 
         StartCoroutine(MeleeCooldown(_meleeCooldown));
     }
-
+    public UnityEvent<float> UpdateUI;
     private IEnumerator MeleeCooldown(float duration)
     {
         _canAttack = false;
-        yield return new WaitForSeconds(duration);
+        UpdateUI.Invoke(0);
+        float startTime = Time.time;
+        while (startTime + duration >= Time.time)
+        {
+            UpdateUI.Invoke((Time.time - startTime) / duration);
+            yield return null;
+        }
+        UpdateUI.Invoke(1);
         _canAttack = true;
     }
 }

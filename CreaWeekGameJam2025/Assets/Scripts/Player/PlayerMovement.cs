@@ -39,6 +39,9 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     private float _moveVolume = 0.1f;
 
     [SerializeField]
+    private AudioSource _deathSound;
+
+    [SerializeField]
     private VisualEffect _bloodSplash;
 
     [SerializeField]
@@ -56,10 +59,6 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     [SerializeField]
     private List<Transform> BodyParts = new List<Transform>();
 
-
-    [SerializeField]
-    private float _jumpCooldown = 0.25f;
-
     private bool _isJumping = false;
 
 
@@ -71,6 +70,8 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        StartCoroutine(SwimUp());
+
         _controls = new PlayerInput();
         _controls.Move.SetCallbacks(this);
         _controls.Jump.SetCallbacks(this);
@@ -114,6 +115,37 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
 
         _bloodSplash.Stop();
         _death.Stop();
+    }
+
+    IEnumerator SwimUp()
+    {
+        _canJump = false ;
+
+        for (int i = 0; i < BodyParts.Count; i++)
+        {
+            BodyParts[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
+            BodyParts[i].transform.localPosition = Vector3.zero +
+                (i * Vector3.down * .4f);
+        }
+
+
+        float startTime = Time.time;
+        while (!_isJumping && startTime + .6f >= Time.time)
+        {
+            Vector3 startPos = Vector3.down * .5f;
+            Vector3 endPos = Vector3.zero;
+
+            BodyParts[0].transform.localPosition = Vector3.Lerp(startPos, endPos, (Time.time - startTime) / .6f);
+
+            Quaternion startRot = Quaternion.Euler(-90, 0, 0);
+            Quaternion endRot = Quaternion.Euler(0, 0, 0);
+
+            BodyParts[0].transform.localRotation = Quaternion.Lerp(startRot, endRot, (Time.time - startTime) / .6f);
+            yield return null;
+        }
+
+        _canJump = true;
+        yield return null;
     }
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
@@ -183,7 +215,14 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         }
 
         //sound
-        _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
+        if (!_isJumping)
+        {
+            _moveSound.volume = _rigidbody.linearVelocity.magnitude * _moveVolume;
+        }
+        else
+        {
+            _moveSound.volume = 0;
+        }
 
     }
     float dst = .3f;
@@ -255,7 +294,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
         {
             float lerpFactor = (Time.time - startTime) / _jumpDuration;
 
-            if (lerpFactor >= 1)
+            if (lerpFactor >= 1 && lerpFactor < 1.1f)
             {
                 _isJumping = false;
                 Ray ray = new Ray(transform.position + Vector3.up * 2, Vector3.down);
@@ -278,6 +317,7 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                     {
                         Debug.LogError("Please add a ScreenShake Component to the main camera!");
                     }
+                    _deathSound.Play();
                     _death.Play();
 
                     yield return new WaitForEndOfFrame();
@@ -290,15 +330,19 @@ public class PlayerMovement : MonoBehaviour, PlayerInput.IMoveActions, PlayerInp
                 {
                     doFX = false;
                     _bloodSplash.SetBool("HeavySplash", true);
+                    _bloodSplash.Stop();
+                    _bloodSplash.Reinit();
                     _bloodSplash.Play();
+                    _jumpSound.pitch = Random.value + 0.5f;
                     _jumpSound.Play();
                 }
 
             }
 
-            if(lerpFactor >= 1.2f)
+            if(lerpFactor >= 1.1f)
             {
-                _isJumping = false;
+                _canJump = false;
+                animate = false;
             }
 
             for (int i = 0; i < BodyParts.Count; i++)
